@@ -3,6 +3,10 @@ main = "src/index.ts"
 compatibility_date = "2024-11-01"
 compatibility_flags = ["nodejs_compat"]
 
+routes = [
+  { pattern = "wedesk.ck971.cc.cd", custom_domain = true }
+]
+
 [durable_objects]
 bindings = [
   { name = "SIGNALING_HUB", class_name = "SignalingHub" }
@@ -10,9 +14,9 @@ bindings = [
 
 [[migrations]]
 tag = "v1"
-new_classes = ["SignalingHub"]
+new_sqlite_classes = ["SignalingHub"]
 
 [[d1_databases]]
 binding = "DB"
 database_name = "wedesk-db"
-database_id = "YOUR_D1_DATABASE_ID"
+database_id = "ee0b6344-775d-44d4-afa1-f141211a5b67"
