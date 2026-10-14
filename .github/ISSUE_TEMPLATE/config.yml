@@ -1,0 +1,12 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Wedesk 项目主页
+    url: https://github.com/demon820308/Wedesk
+    about: 欢迎访问项目主页！
+  - name: Wedesk 最新版下载
+    url: https://github.com/demon820308/Wedesk/releases
+    about: 遇到问题，先看看版本是不是最新的，优先使用最新版！
+  - name: Wedesk 讨论区
+    url: https://github.com/demon820308/Wedesk/issues
+    about: 欢迎在 Issues 交流！
+

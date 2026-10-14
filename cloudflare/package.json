@@ -1,0 +1,17 @@
+{
+  "name": "wedesk-cf-backend",
+  "version": "1.0.0",
+  "description": "Zero-server Cloudflare Worker backend for Wedesk",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "db:init": "wrangler d1 execute wedesk-db --file=./schema.sql --remote",
+    "db:init:local": "wrangler d1 execute wedesk-db --file=./schema.sql --local"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241127.0",
+    "typescript": "^5.6.2",
+    "wrangler": "^3.90.0"
+  }
+}
