@@ -5,6 +5,7 @@
 {
   $schema: 'https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json',
   appId: 'com.wedesk.app',
+  npmRebuild: false,
   // asar: false,
   // 优先读取这个文件的productName，没有就会读取package.json的productName
   // productName: 'Wedesk',

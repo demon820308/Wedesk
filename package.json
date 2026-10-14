@@ -49,6 +49,7 @@
     "billd-utils": "^0.0.25",
     "js-cookie": "^3.0.5",
     "naive-ui": "^2.34.4",
+    "node-abi": "^3.71.0",
     "pinia": "^2.1.6",
     "pinia-plugin-persistedstate": "^3.2.1",
     "socket.io-client": "^4.8.0",
