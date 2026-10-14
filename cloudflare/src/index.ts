@@ -314,29 +314,33 @@ export class SignalingHub {
     const session = this.sockets.get(ws);
     if (!session) return;
 
-    // 1. 客户端上线加入房间
-    if (event === 'billdDeskJoin') {
-      const deskUserUuid = payload?.data?.deskUserUuid;
-      const roomId = payload?.data?.live_room_id || deskUserUuid;
-
-      session.uuid = deskUserUuid;
-      session.roomId = roomId;
+    // 1. 客户端上线加入房间 / 状态心跳上报
+    if (event === 'billdDeskJoin' || event === 'billdDeskUpdateUser') {
+      const data = payload?.data || {};
+      const deskUserUuid = data.deskUserUuid;
+      const roomId = data.live_room_id || data.roomId || deskUserUuid;
 
       if (deskUserUuid) {
+        session.uuid = deskUserUuid;
         this.uuidMap.set(deskUserUuid, ws);
       }
 
-      if (!this.rooms.has(roomId)) {
-        this.rooms.set(roomId, new Set());
+      if (roomId) {
+        session.roomId = roomId;
+        if (!this.rooms.has(roomId)) {
+          this.rooms.set(roomId, new Set());
+        }
+        this.rooms.get(roomId)!.add(ws);
       }
-      this.rooms.get(roomId)!.add(ws);
 
-      // 回复加入成功
-      this.emitTo(ws, 'billdDeskJoined', {
-        live_room: { id: roomId },
-        anchor_info: {},
-        receiver: socketId,
-      });
+      // 仅 join 时回复 joined
+      if (event === 'billdDeskJoin') {
+        this.emitTo(ws, 'billdDeskJoined', {
+          live_room: { id: roomId },
+          anchor_info: {},
+          receiver: socketId,
+        });
+      }
       return;
     }
 
@@ -370,11 +374,15 @@ export class SignalingHub {
       return;
     }
 
-    // 3. WebRTC 信令转发: Offer / Answer / Candidate
+    // 3. WebRTC 信令转发: Offer / Answer / Candidate / Behavior
     if (
       event === 'nativeWebRtcOffer' ||
       event === 'nativeWebRtcAnswer' ||
-      event === 'nativeWebRtcCandidate'
+      event === 'nativeWebRtcCandidate' ||
+      event === 'billdDeskOffer' ||
+      event === 'billdDeskAnswer' ||
+      event === 'billdDeskCandidate' ||
+      event === 'billdDeskBehavior'
     ) {
       const targetSocketId = payload?.data?.receiver;
       const targetWs = targetSocketId
