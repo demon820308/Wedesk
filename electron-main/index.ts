@@ -103,6 +103,12 @@ async function createWindow({
   });
 
   windowMap.set(windowId, win);
+
+  win.webContents.on('before-input-event', (_event, input) => {
+    if (input.key === 'F12' || (input.control && input.shift && input.key.toLowerCase() === 'i')) {
+      win.webContents.toggleDevTools();
+    }
+  });
   let url = '';
   const params = `${(route ? route : '') as string}${handleUrlQuery({
     windowId: `${windowId as number}`,

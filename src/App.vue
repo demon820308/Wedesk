@@ -67,8 +67,8 @@ const themeOverrides: GlobalThemeOverrides = {
 
 onMounted(() => {
   console.log('当前地址栏', location.href);
-  appStore.version = APP_BUILD_INFO.pkgVersion;
-  appStore.lastBuildDate = APP_BUILD_INFO.lastBuildDate;
+  appStore.version = APP_BUILD_INFO?.pkgVersion || '0.0.1';
+  appStore.lastBuildDate = APP_BUILD_INFO?.lastBuildDate || '';
   handlesetAlwaysOnTop({
     windowId: WINDOW_ID_ENUM.remote,
     flag: cacheStore.isAlwaysOnTop,

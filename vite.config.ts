@@ -19,21 +19,7 @@ const isWeb = process.env['VITE_APP_RELEASE_PROJECT_ISWEB'] === 'true';
 export default defineConfig(({ mode }) => {
   const isProduction = mode === 'production';
 
-  const outputStaticUrl = () => {
-    if (isWeb) {
-      if (isProduction) {
-        return './';
-      } else {
-        return './';
-      }
-    } else {
-      if (isProduction) {
-        return 'dist';
-      } else {
-        return './';
-      }
-    }
-  };
+  const outputStaticUrl = () => './';
 
   return {
     base: outputStaticUrl(),
