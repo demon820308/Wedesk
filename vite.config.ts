@@ -67,29 +67,30 @@ export default defineConfig(({ mode }) => {
           },
         },
       }),
-      electron({
-        main: {
-          entry: 'electron-main/index.ts', // 主进程文件
-          vite: {
-            build: {
-              outDir: 'electron-dist',
-              lib: {
-                entry: 'electron-main/index.ts', // 主进程文件
-                formats: ['cjs'],
-                fileName: () => '[name].cjs',
+      !isWeb &&
+        electron({
+          main: {
+            entry: 'electron-main/index.ts', // 主进程文件
+            vite: {
+              build: {
+                outDir: 'electron-dist',
+                lib: {
+                  entry: 'electron-main/index.ts', // 主进程文件
+                  formats: ['cjs'],
+                  fileName: () => '[name].cjs',
+                },
               },
             },
           },
-        },
-        preload: {
-          input: 'electron-main/preload.ts',
-          vite: {
-            build: {
-              outDir: 'electron-dist',
+          preload: {
+            input: 'electron-main/preload.ts',
+            vite: {
+              build: {
+                outDir: 'electron-dist',
+              },
             },
           },
-        },
-      }),
+        }),
       // renderer({
       //   resolve: {
       //     '@nut-tree/nut-js': { type: 'cjs' },
