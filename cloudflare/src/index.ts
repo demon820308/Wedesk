@@ -195,6 +195,19 @@ export default {
         });
       }
 
+      // 4.6 版本检查 API 兼容 (避免前端控制台报 404)
+      if (
+        pathname === '/desk_version/check' ||
+        pathname === '/desk_version/find_by_version' ||
+        pathname === '/desk_version/latest'
+      ) {
+        return jsonResponse({
+          code: 200,
+          message: 'ok',
+          data: null,
+        });
+      }
+
       return jsonResponse({ code: 404, message: `Not Found: ${pathname}` }, 404);
     } catch (err: any) {
       return jsonResponse(
@@ -266,11 +279,12 @@ export class SignalingHub {
     this.socketIdMap.set(socketId, ws);
 
     // 1. 发送 Engine.IO v4 握手报文: 0{"sid":...}
+    // 将 pingInterval 和 pingTimeout 增大至 10 分钟，依靠客户端的高频业务心跳（billdDeskUpdateUser）保活，彻底杜绝客户端每 45 秒触发 ping timeout 异常断开
     const handshake = `0${JSON.stringify({
       sid: socketId,
       upgrades: [],
-      pingInterval: 25000,
-      pingTimeout: 20000,
+      pingInterval: 600000,
+      pingTimeout: 600000,
       maxPayload: 1000000,
     })}`;
     ws.send(handshake);
@@ -281,7 +295,11 @@ export class SignalingHub {
 
       // 心跳 Ping/Pong
       if (raw === '2') {
-        ws.send('3'); // Pong
+        ws.send('3'); // 收到客户端 Ping，回复 Pong
+        return;
+      }
+      if (raw === '3') {
+        // 收到客户端 Pong
         return;
       }
 

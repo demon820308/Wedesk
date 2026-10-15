@@ -510,7 +510,7 @@ function handleLoopBilldDeskUpdateUserTimer() {
         remoteDeskUserPassword: cacheStore.remoteDeskUserPassword,
       },
     });
-  }, 1000 * 2);
+  }, 1000 * 5);
 }
 
 async function handleInit() {

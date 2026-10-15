@@ -617,7 +617,7 @@ function handleLoopBilldDeskUpdateUserTimer() {
         remoteDeskUserPassword: remoteDeskUserPassword.value,
       },
     });
-  }, 1000 * 2);
+  }, 1000 * 5);
 }
 
 function handleWsMsg() {
