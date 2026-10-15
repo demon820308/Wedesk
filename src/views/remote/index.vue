@@ -639,8 +639,8 @@ async function handleUpdatePassword() {
     // if (cacheStore.deskUserPassword === originalPassword.value) return;
     if (
       cacheStore.deskUserPassword &&
-      cacheStore.deskUserPassword.length > 6 &&
-      cacheStore.deskUserPassword.length < 12
+      cacheStore.deskUserPassword.length >= 6 &&
+      cacheStore.deskUserPassword.length <= 12
     ) {
       await fetchDeskUserUpdateByUuid({
         uuid: cacheStore.deskUserUuid!,

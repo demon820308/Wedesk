@@ -66,8 +66,8 @@ onMounted(() => {
 function handleConfirm() {
   if (
     password.value &&
-    password.value.length > 6 &&
-    password.value.length < 12
+    password.value.length >= 6 &&
+    password.value.length <= 12
   ) {
     emits('confirm', password.value);
   } else {
