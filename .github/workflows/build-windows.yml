@@ -56,9 +56,8 @@ jobs:
           # 1. 查找 NSIS 安装包并命名
           $nsisInstaller = Get-ChildItem -Path "src-tauri/target/release/bundle/nsis/*.exe" | Select-Object -First 1
           if ($nsisInstaller) {
-            Copy-Item $nsisInstaller.FullName -Destination "release-assets/windows-x64.exe"
             Copy-Item $nsisInstaller.FullName -Destination "release-assets/wedesk-0.1.0-windows-x64.exe"
-            Write-Host "Found Installer: $($nsisInstaller.FullName)"
+            Write-Host "Found Installer: $($nsisInstaller.FullName) -> wedesk-0.1.0-windows-x64.exe"
           } else {
             Write-Error "NSIS installer not found!"
           }
@@ -67,9 +66,8 @@ jobs:
           $mainExe = Get-ChildItem -Path "src-tauri/target/release/*.exe" -Exclude "*.temp" | Where-Object { $_.Name -like "wedesk*.exe" -or $_.Name -like "app*.exe" } | Select-Object -First 1
           if ($mainExe) {
             Copy-Item $mainExe.FullName -Destination "temp-portable/Wedesk.exe"
-            Compress-Archive -Path "temp-portable/*" -DestinationPath "release-assets/windows-x64-portable.zip" -Force
-            Copy-Item "release-assets/windows-x64-portable.zip" -Destination "release-assets/wedesk-0.1.0-windows-x64-portable.zip"
-            Write-Host "Created Portable zip with executable: $($mainExe.FullName)"
+            Compress-Archive -Path "temp-portable/*" -DestinationPath "release-assets/wedesk-0.1.0-windows-x64-portable.zip" -Force
+            Write-Host "Created Portable zip with executable: $($mainExe.FullName) -> wedesk-0.1.0-windows-x64-portable.zip"
           } else {
             Write-Error "Main executable not found for portable zip!"
           }
