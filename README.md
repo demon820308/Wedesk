@@ -8,6 +8,7 @@
     <a href="#快速上手">快速上手</a> ·
     <a href="#cloudflare-边缘后端部署指引">Cloudflare 部署</a> ·
     <a href="#技术架构">技术架构</a> ·
+    <a href="#-致谢与开源鸣谢">开源鸣谢</a> ·
     <a href="LICENSE.txt">开源协议</a>
   </p>
   <p>
@@ -25,7 +26,7 @@
 
 | 🚀 原生极速 · 极致轻量 | 🎯 紧凑面板 · 双端自适应 | ☁️ 零服务器 · Cloudflare 托管 |
 | :--- | :--- | :--- |
-| 告别传统 Electron 笨重运行环境，采用 **Tauri 2.0 (Rust)** 原生编译，安装包仅十几兆，内存占用极低，极速秒启。 | 精心设计的左右双列控制面板，完美适配紧凑桌面视窗无溢出，支持设备代码与连接密码**一键复制**，直观清晰。 | 依托 **Cloudflare Workers + D1 + Durable Objects** 打造 100% Serverless 信令后端，无需购买 VPS，零运维成本。 |
+| 采用 **Tauri 2.0 (Rust)** 原生编译，安装包仅几兆，内存占用极低，极速秒启。 | 精心设计的左右双列控制面板，完美适配紧凑桌面视窗无溢出，支持设备代码与连接密码**一键复制**，直观清晰。 | 依托 **Cloudflare Workers + D1 + Durable Objects** 打造 100% Serverless 信令后端，无需购买 VPS，零运维成本。 |
 
 数据流经 WebRTC 点对点直连（P2P DataChannel 与 MediaStream），低延迟传输，端到端私密安全。
 
@@ -212,6 +213,14 @@ npx wrangler pages deploy dist --project-name wedesk-web
 │  └───────────────────────┘   └──────────────────────┘  │
 └────────────────────────────────────────────────────────┘
 ```
+
+---
+
+## 🙏 致谢与开源鸣谢
+
+本项目基于 [galaxy-s10/billd-desk](https://github.com/galaxy-s10/billd-desk) 进行二次开发与架构重构（剥离 Electron 全面转向 Tauri 2.0 原生架构与 Cloudflare Serverless 边缘网络）。
+
+衷心感谢原作者 [@galaxy-s10](https://github.com/galaxy-s10) 提供优秀的开源源码与贡献支持！
 
 ---
 
