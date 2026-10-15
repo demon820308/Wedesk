@@ -7,14 +7,11 @@ import { NaiveUiResolver } from 'unplugin-vue-components/resolvers';
 import unpluginVueComponents from 'unplugin-vue-components/vite';
 import { defineConfig } from 'vite';
 import checker from 'vite-plugin-checker';
-import electron from 'vite-plugin-electron/simple';
 import eslint from 'vite-plugin-eslint2';
 import { createHtmlPlugin } from 'vite-plugin-html';
 
 import pkg from './package.json';
 import { prodDomain } from './src/spec-config';
-
-const isWeb = process.env['VITE_APP_RELEASE_PROJECT_ISWEB'] === 'true';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
@@ -54,34 +51,6 @@ export default defineConfig(({ mode }) => {
           },
         },
       }),
-      !isWeb &&
-        electron({
-          main: {
-            vite: {
-              build: {
-                outDir: 'electron-dist',
-                lib: {
-                  entry: 'electron-main/index.ts', // 主进程文件
-                  formats: ['cjs'],
-                  fileName: () => '[name].cjs',
-                },
-              },
-            },
-          },
-          preload: {
-            input: 'electron-main/preload.ts',
-            vite: {
-              build: {
-                outDir: 'electron-dist',
-              },
-            },
-          },
-        }),
-      // renderer({
-      //   resolve: {
-      //     '@nut-tree/nut-js': { type: 'cjs' },
-      //   },
-      // }),
       checker({
         // typescript: true,
         vueTsc: true,

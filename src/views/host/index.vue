@@ -13,45 +13,58 @@
 
         <div class="divider"></div>
 
-        <div class="card-section">
-          <div class="field-label">设备代码</div>
-          <div class="code-row">
-            <div class="code-val">{{ formattedDeviceUuid }}</div>
-            <div class="actions">
-              <div
-                class="btn-icon copy"
-                title="复制设备代码"
-                @click="handleCopy(cacheStore.deskUserUuid, '已复制设备代码！')"
-              ></div>
-              <div
-                class="btn-icon refresh"
-                title="重新生成设备代码"
-                @click="handleResetDeskuuid"
-              ></div>
+        <div class="grid-sections">
+          <div class="card-section">
+            <div class="field-label">设备代码</div>
+            <div class="code-row">
+              <div class="code-val">{{ formattedDeviceUuid }}</div>
+              <div class="actions">
+                <div
+                  class="btn-icon copy"
+                  title="复制设备代码"
+                  @click="
+                    handleCopy(cacheStore.deskUserUuid, '已复制设备代码！')
+                  "
+                ></div>
+                <div
+                  class="btn-icon refresh"
+                  title="重新生成设备代码"
+                  @click="handleResetDeskuuid"
+                ></div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div class="divider"></div>
+          <div class="col-divider"></div>
 
-        <div class="card-section">
-          <div class="field-label">连接密码</div>
-          <div class="code-row">
-            <div class="code-val pwd">
-              {{ cacheStore.hidePwd ? '••••••' : cacheStore.deskUserPassword }}
-            </div>
-            <div class="actions">
-              <div
-                class="btn-icon eye"
-                :class="{ hide: cacheStore.hidePwd }"
-                :title="cacheStore.hidePwd ? '显示密码' : '隐藏密码'"
-                @click="cacheStore.hidePwd = !cacheStore.hidePwd"
-              ></div>
-              <div
-                class="btn-icon refresh"
-                title="刷新临时密码"
-                @click="handleUpdatePassword"
-              ></div>
+          <div class="card-section">
+            <div class="field-label">连接密码</div>
+            <div class="code-row">
+              <div class="code-val pwd">
+                {{
+                  cacheStore.hidePwd ? '••••••' : cacheStore.deskUserPassword
+                }}
+              </div>
+              <div class="actions">
+                <div
+                  class="btn-icon copy"
+                  title="复制连接密码"
+                  @click="
+                    handleCopy(cacheStore.deskUserPassword, '已复制连接密码！')
+                  "
+                ></div>
+                <div
+                  class="btn-icon eye"
+                  :class="{ hide: cacheStore.hidePwd }"
+                  :title="cacheStore.hidePwd ? '显示密码' : '隐藏密码'"
+                  @click="cacheStore.hidePwd = !cacheStore.hidePwd"
+                ></div>
+                <div
+                  class="btn-icon refresh"
+                  title="刷新临时密码"
+                  @click="handleUpdatePassword"
+                ></div>
+              </div>
             </div>
           </div>
         </div>
@@ -145,6 +158,7 @@ const activeSessions = computed(() => {
   box-sizing: border-box;
   height: 100vh;
   background-color: $cursor-canvas;
+  overflow-y: auto;
 
   .nav-space {
     height: $top-system-bar-height;
@@ -153,7 +167,7 @@ const activeSessions = computed(() => {
   .container {
     max-width: 560px;
     margin: 0 auto;
-    padding: 24px 32px 32px;
+    padding: 18px 28px 24px;
   }
 
   .card {
@@ -164,7 +178,7 @@ const activeSessions = computed(() => {
   }
 
   .main-card {
-    padding: 24px 28px;
+    padding: 16px 22px;
 
     .card-header {
       display: flex;
@@ -172,77 +186,97 @@ const activeSessions = computed(() => {
       justify-content: space-between;
 
       .title {
-        font-size: 17px;
+        font-size: 16px;
         font-weight: 600;
         color: $cursor-ink;
       }
     }
 
     .divider {
-      margin: 18px 0;
+      margin: 12px 0 14px;
       height: 1px;
       background-color: $cursor-hairline;
     }
 
-    .card-section {
-      .field-label {
-        font-size: 13px;
-        color: $cursor-muted;
-        margin-bottom: 8px;
-        font-weight: 500;
-      }
+    .grid-sections {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
 
-      .code-row {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
+      .card-section {
+        flex: 1;
+        min-width: 0;
 
-        .code-val {
-          font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-          font-size: 32px;
-          font-weight: 700;
-          color: $cursor-primary;
-          letter-spacing: 2px;
-          user-select: text;
-
-          &.pwd {
-            font-size: 28px;
-            color: $cursor-ink;
-            letter-spacing: 4px;
-          }
+        .field-label {
+          font-size: 12px;
+          color: $cursor-muted;
+          margin-bottom: 4px;
+          font-weight: 500;
         }
 
-        .actions {
+        .code-row {
           display: flex;
           align-items: center;
-          gap: 12px;
+          justify-content: space-between;
+          gap: 8px;
 
-          .btn-icon {
-            width: 22px;
-            height: 22px;
-            cursor: pointer;
-            opacity: 0.65;
-            transition: all 0.2s ease;
+          .code-val {
+            font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+            font-size: 22px;
+            font-weight: 700;
+            color: $cursor-primary;
+            letter-spacing: 1px;
+            user-select: text;
+            white-space: nowrap;
 
-            &:hover {
-              opacity: 1;
-              transform: scale(1.1);
+            &.pwd {
+              font-size: 20px;
+              color: $cursor-ink;
+              letter-spacing: 2px;
             }
+          }
 
-            &.copy {
-              @include setBackground('@/assets/img/copy.png');
-            }
-            &.refresh {
-              @include setBackground('@/assets/img/refresh.png');
-            }
-            &.eye {
-              @include setBackground('@/assets/img/view.png');
-              &.hide {
-                @include setBackground('@/assets/img/view_off.png');
+          .actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+
+            .btn-icon {
+              width: 19px;
+              height: 19px;
+              cursor: pointer;
+              opacity: 0.65;
+              transition: all 0.2s ease;
+
+              &:hover {
+                opacity: 1;
+                transform: scale(1.1);
+              }
+
+              &.copy {
+                @include setBackground('@/assets/img/copy.png');
+              }
+              &.refresh {
+                @include setBackground('@/assets/img/refresh.png');
+              }
+              &.eye {
+                @include setBackground('@/assets/img/view.png');
+                &.hide {
+                  @include setBackground('@/assets/img/view_off.png');
+                }
               }
             }
           }
         }
+      }
+
+      .col-divider {
+        width: 1px;
+        height: 44px;
+        background-color: $cursor-hairline-soft;
+        flex-shrink: 0;
       }
     }
   }
@@ -251,7 +285,7 @@ const activeSessions = computed(() => {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-top: 18px;
+    margin-top: 14px;
     padding: 0 4px;
 
     .status-indicator {
@@ -301,8 +335,8 @@ const activeSessions = computed(() => {
   }
 
   .active-sessions {
-    margin-top: 20px;
-    padding: 16px 20px;
+    margin-top: 16px;
+    padding: 14px 18px;
     border-left: 4px solid $cursor-primary;
 
     .session-title {
