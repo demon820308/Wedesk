@@ -57,6 +57,7 @@ const loopBilldDeskUpdateUserTimer = ref();
 const isServiceReady = ref(false);
 const hostLastSyncedText = ref('');
 let hasHostClipboardListener = false;
+const deletingSet = new Set<string>();
 
 export function useHostService() {
   const appStore = useAppStore();
@@ -128,7 +129,7 @@ export function useHostService() {
       (newval) => {
         newval.forEach((item) => {
           const cleanup = () => {
-            handleDel(item.sender);
+            handleDel(item.receiver);
           };
 
           if (item.peerConnection) {
@@ -714,15 +715,29 @@ export function useHostService() {
     appStore.remoteDesk.clear();
   }
 
-  function handleDel(sender: string) {
+  function handleDel(targetId: string) {
+    let realId = targetId;
+    if (!appStore.remoteDesk.has(realId)) {
+      if (appStore.remoteDesk.size === 1) {
+        realId = Array.from(appStore.remoteDesk.keys())[0];
+      } else {
+        return;
+      }
+    }
+
+    if (deletingSet.has(realId)) {
+      return;
+    }
+    deletingSet.add(realId);
+
     try {
-      networkStore.rtcMap.get(sender)?.dataChannelSend({
+      networkStore.rtcMap.get(realId)?.dataChannelSend({
         requestId: getRandomString(8),
         msgType: WsMsgTypeEnum.billdDeskCloseRemote,
         data: {
           roomId: roomId.value,
           sender: mySocketId.value,
-          receiver: sender,
+          receiver: realId,
         },
       });
       networkStore.wsMap.get(roomId.value)?.send({
@@ -731,21 +746,23 @@ export function useHostService() {
         data: {
           roomId: roomId.value,
           sender: mySocketId.value,
-          receiver: sender,
+          receiver: realId,
           remoteDeskUserUuid: cacheStore.deskUserUuid,
         },
       });
     } catch (e) {
       console.error('发送断开信令异常:', e);
     }
+
+    networkStore.removeRtc(realId);
+    appStore.remoteDesk.delete(realId);
+    if (!appStore.remoteDesk.size) {
+      handleCloseAll();
+    }
+    window.$message?.success?.('已断开该连接');
     setTimeout(() => {
-      networkStore.removeRtc(sender);
-      appStore.remoteDesk.delete(sender);
-      if (!appStore.remoteDesk.size) {
-        handleCloseAll();
-      }
-      window.$message?.success?.('已断开该连接');
-    }, 80);
+      deletingSet.delete(realId);
+    }, 1500);
   }
 
   async function handleUpdatePassword() {
