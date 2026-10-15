@@ -536,17 +536,27 @@ export class WebRTCClass {
       return;
     }
     if (!this.peerConnection) {
-      const iceServers = this.isSRS
+      const iceServers: RTCIceServer[] = this.isSRS
         ? []
         : [
-            // {
-            //   urls: 'stun:stun.l.google.com:19302',
-            // },
             {
-              urls: getCoturnUrl() || COTURN_URL,
-              username: 'hss',
-              credential: '123456',
+              urls: [
+                'stun:stun.cloudflare.com:3478',
+                'stun:stun.qq.com:3478',
+                'stun:stun.miwifi.com:3478',
+                'stun:stun.chat.bilibili.com:3478',
+                'stun:stun.l.google.com:19302',
+              ],
             },
+            ...(getCoturnUrl()
+              ? [
+                  {
+                    urls: getCoturnUrl()!,
+                    username: 'hss',
+                    credential: '123456',
+                  },
+                ]
+              : []),
           ];
       this.peerConnection = new RTCPeerConnection({
         iceServers,
