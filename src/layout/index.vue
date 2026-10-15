@@ -3,6 +3,7 @@
     <div
       v-if="useCustomBar"
       class="system-bar"
+      data-tauri-drag-region
       :class="{ 'no-drag': !appStore.isMac, drag: appStore.isMac }"
       @mousedown="startMove"
       @mouseup="endMove"
@@ -10,24 +11,46 @@
       @mouseleave="handleMouseleave"
     >
       <div class="top-left">
-        <div class="left">
-          <div
-            class="ico close"
-            @click="handleClose"
-          >
-            <div class="corss"></div>
-          </div>
+        <div class="brand-title">
+          <span class="name">Wedesk</span>
+          <span class="version">v{{ appStore.version }}</span>
+        </div>
+      </div>
+      <div class="top-right">
+        <div
+          class="window-controls"
+          @mousedown.stop
+        >
           <div
             class="ico min"
-            @click="handleMin"
+            title="最小化"
+            @click.stop="handleMin"
           >
             <div class="heng"></div>
           </div>
-          <div class="ico max"></div>
+          <div
+            class="ico max"
+            :title="isMaximized ? '向下还原' : '最大化'"
+            @click.stop="handleMax"
+          >
+            <div
+              v-if="!isMaximized"
+              class="fang"
+            ></div>
+            <div
+              v-else
+              class="restore"
+            ></div>
+          </div>
+          <div
+            class="ico close"
+            title="关闭"
+            @click.stop="handleClose"
+          >
+            <div class="corss"></div>
+          </div>
         </div>
-        <div class="right">v{{ appStore.version }}</div>
       </div>
-      <div class="top-right"></div>
     </div>
     <div class="sidebar">
       <div class="user">
@@ -36,29 +59,134 @@
       <div class="list">
         <div
           class="item"
+          :class="{ active: route.name === routerName.host }"
+          @click="router.push({ name: routerName.host })"
+        >
+          <svg
+            class="nav-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect
+              x="2"
+              y="3"
+              width="20"
+              height="14"
+              rx="2"
+              ry="2"
+            ></rect>
+            <line
+              x1="8"
+              y1="21"
+              x2="16"
+              y2="21"
+            ></line>
+            <line
+              x1="12"
+              y1="17"
+              x2="12"
+              y2="21"
+            ></line>
+            <path d="M12 7v5m0 0l-2-2m2 2l2-2"></path>
+          </svg>
+          <span>被控</span>
+        </div>
+        <div
+          class="item"
           :class="{ active: route.name === routerName.remote }"
           @click="router.push({ name: routerName.remote })"
         >
-          远程控制
+          <svg
+            class="nav-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect
+              x="2"
+              y="3"
+              width="20"
+              height="14"
+              rx="2"
+              ry="2"
+            ></rect>
+            <line
+              x1="8"
+              y1="21"
+              x2="16"
+              y2="21"
+            ></line>
+            <line
+              x1="12"
+              y1="17"
+              x2="12"
+              y2="21"
+            ></line>
+            <path d="M12 12V7m0 0l-2 2m2-2l2 2"></path>
+          </svg>
+          <span>主控</span>
         </div>
         <div
           class="item"
           :class="{ active: route.name === routerName.deviceManage }"
           @click="router.push({ name: routerName.deviceManage })"
         >
-          设备列表
+          <svg
+            class="nav-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path
+              d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
+            ></path>
+          </svg>
+          <span>设备簿</span>
         </div>
         <div
           class="item"
           :class="{ active: route.name === routerName.setting }"
           @click="router.push({ name: routerName.setting })"
         >
-          高级设置
+          <svg
+            class="nav-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <circle
+              cx="12"
+              cy="12"
+              r="3"
+            ></circle>
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+            ></path>
+          </svg>
+          <span>设置</span>
         </div>
       </div>
     </div>
     <div class="view">
-      <RouterView></RouterView>
+      <RouterView v-slot="{ Component }">
+        <keep-alive>
+          <component :is="Component" />
+        </keep-alive>
+      </RouterView>
     </div>
     <div
       class="debug-area"
@@ -107,6 +235,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import { WINDOW_ID_ENUM } from '@/constant';
 import { IPC_EVENT } from '@/event';
+import { useHostService } from '@/hooks/use-hostService';
 import { useIpcRendererSend } from '@/hooks/use-ipcRendererSend';
 import { IIpcRendererData } from '@/interface';
 import { routerName } from '@/router';
@@ -117,12 +246,20 @@ import {
   ipcRendererOn,
   ipcRendererSend,
 } from '@/utils';
+import {
+  desktopStartDragging,
+  desktopWindowClose,
+  desktopWindowMinimize,
+  desktopWindowToggleMaximize,
+  isTauri,
+} from '@/utils/desktopBridge';
 
 const appStore = useAppStore();
 const router = useRouter();
 const route = useRoute();
 
 const { handleOpenDevTools } = useIpcRendererSend();
+const { initHost } = useHostService();
 
 // 窗口当前的位置 + 鼠标当前的相对位置 - 鼠标以前的相对位置
 const isMoving = ref<boolean>(false);
@@ -131,10 +268,22 @@ const useCustomBar = ref(true);
 const clickNum = ref(1);
 
 onMounted(() => {
-  if (!ipcRenderer) {
+  if (!ipcRenderer && !isTauri()) {
     useCustomBar.value = false;
   }
+  if (isTauri()) {
+    import('@tauri-apps/api/window').then(({ getCurrentWindow }) => {
+      const win = getCurrentWindow();
+      win.isMaximized().then((max) => {
+        isMaximized.value = max;
+      });
+      win.onResized(async () => {
+        isMaximized.value = await win.isMaximized();
+      });
+    });
+  }
   init();
+  initHost();
 });
 
 async function init() {
@@ -204,25 +353,38 @@ function handleOpenDebug() {
   }
 }
 
+const isMaximized = ref(false);
+
 function handleClose() {
-  ipcRendererSend({
-    windowId: WINDOW_ID_ENUM.remote,
-    channel: IPC_EVENT.closeAllWindow,
-    requestId: getRandomString(8),
-    data: {},
-  });
+  desktopWindowClose();
 }
 
 function handleMin() {
-  ipcRendererSend({
-    windowId: WINDOW_ID_ENUM.remote,
-    channel: IPC_EVENT.windowMinimize,
-    requestId: getRandomString(8),
-    data: {},
-  });
+  desktopWindowMinimize();
 }
 
+async function handleMax() {
+  if (isTauri()) {
+    isMaximized.value = await desktopWindowToggleMaximize();
+  } else {
+    desktopWindowToggleMaximize();
+  }
+}
+
+ipcRendererOn(
+  IPC_EVENT.response_windowMaximize,
+  (_event, data: IIpcRendererData) => {
+    if (data?.data?.isMaximized !== undefined) {
+      isMaximized.value = data.data.isMaximized;
+    }
+  }
+);
+
 const startMove = (e: MouseEvent) => {
+  if (isTauri()) {
+    desktopStartDragging();
+    return;
+  }
   if (appStore.isMac) {
     return;
   }
@@ -232,21 +394,21 @@ const startMove = (e: MouseEvent) => {
 };
 
 const endMove = () => {
-  if (appStore.isMac) {
+  if (isTauri() || appStore.isMac) {
     return;
   }
   isMoving.value = false;
 };
 
 const handleMouseleave = () => {
-  if (appStore.isMac) {
+  if (isTauri() || appStore.isMac) {
     return;
   }
   isMoving.value = false;
 };
 
 const moving = (e: MouseEvent) => {
-  if (appStore.isMac) {
+  if (isTauri() || appStore.isMac) {
     return;
   }
   if (isMoving.value) {
@@ -288,61 +450,120 @@ $sidebar-width: 160px;
     user-select: none;
     .top-left {
       display: flex;
-      align-items: baseline;
-      justify-content: space-between;
+      align-items: center;
       box-sizing: border-box;
-      padding: 10px 8px 0 12px;
+      padding: 0 16px;
       width: $sidebar-width;
-      .left {
+      height: 100%;
+
+      .brand-title {
+        display: flex;
+        align-items: baseline;
+        gap: 6px;
+
+        .name {
+          color: $cursor-ink;
+          font-size: 13px;
+          font-weight: 600;
+          letter-spacing: -0.2px;
+        }
+
+        .version {
+          color: $cursor-muted;
+          font-size: 11px;
+        }
+      }
+    }
+
+    .top-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      box-sizing: border-box;
+      padding-right: 14px;
+      width: calc(100vw - $sidebar-width);
+      height: 100%;
+
+      .window-controls {
         display: flex;
         align-items: center;
+        gap: 8px;
+        -webkit-app-region: no-drag;
 
         .ico {
           display: flex;
           align-items: center;
           justify-content: center;
-          margin-right: 8px;
           width: 14px;
           height: 14px;
           border-radius: 50%;
-          font-size: 12px;
           cursor: pointer;
-
+          transition:
+            transform 0.15s ease,
+            filter 0.15s ease;
           -webkit-app-region: no-drag;
+
+          &:hover {
+            filter: brightness(1.1);
+            transform: scale(1.08);
+          }
+
+          &:active {
+            transform: scale(0.95);
+          }
+
+          .heng {
+            width: 7px;
+            height: 1.5px;
+            background-color: #1a1a1a;
+          }
+
+          .fang {
+            width: 6px;
+            height: 6px;
+            border: 1px solid #1a1a1a;
+            box-sizing: border-box;
+          }
+
+          .restore {
+            position: relative;
+            width: 5px;
+            height: 5px;
+            border: 1px solid #1a1a1a;
+            box-sizing: border-box;
+
+            &::after {
+              content: '';
+              position: absolute;
+              top: -2px;
+              right: -2px;
+              width: 4px;
+              height: 4px;
+              border-top: 1px solid #1a1a1a;
+              border-right: 1px solid #1a1a1a;
+            }
+          }
+
           .corss {
             width: 7px;
             height: 7px;
 
-            @include cross(black, 1px);
+            @include cross(#1a1a1a, 1px);
           }
-          .heng {
-            width: 7px;
-            height: 1px;
-            background-color: black;
-          }
-          &.close {
-            background-color: #f7564d;
-          }
+
           &.min {
             background-color: #f6c84e;
           }
+
           &.max {
-            background-color: #dedede;
-            cursor: auto;
+            background-color: #4cd964;
+          }
+
+          &.close {
+            background-color: #f7564d;
           }
         }
       }
-      .right {
-        display: flex;
-        align-items: center;
-        color: #666;
-        font-size: 12px;
-      }
-    }
-    .top-right {
-      display: flex;
-      align-items: center;
-      width: calc(100vw - $sidebar-width);
     }
   }
   .sidebar {
@@ -375,24 +596,46 @@ $sidebar-width: 160px;
     .list {
       padding-top: 20px;
       .item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
         margin-bottom: 6px;
         padding: 0 12px;
-        height: 36px;
+        height: 38px;
         border-radius: $cursor-radius-md;
         color: $cursor-body;
         font-size: 14px;
-        line-height: 36px;
         cursor: pointer;
         transition: all 0.2s ease;
+
+        .nav-icon {
+          width: 17px;
+          height: 17px;
+          opacity: 0.65;
+          flex-shrink: 0;
+          transition: all 0.2s ease;
+        }
+
         &:hover {
           background-color: $cursor-hairline-soft;
           color: $cursor-ink;
+
+          .nav-icon {
+            opacity: 1;
+          }
         }
+
         &.active {
           background-color: $cursor-surface-card;
           color: $cursor-primary;
           font-weight: 500;
           border: 1px solid $cursor-hairline;
+          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+
+          .nav-icon {
+            opacity: 1;
+            stroke: $cursor-primary;
+          }
         }
       }
     }

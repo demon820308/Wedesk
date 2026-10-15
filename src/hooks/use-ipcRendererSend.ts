@@ -7,6 +7,7 @@ import {
   WsBilldDeskBehaviorType,
 } from '@/types/websocket';
 import { ipcRenderer, ipcRendererInvoke, ipcRendererSend } from '@/utils';
+import { isTauri } from '@/utils/desktopBridge';
 
 export const useIpcRendererSend = () => {
   const appStore = useAppStore();
@@ -201,6 +202,53 @@ export const useIpcRendererSend = () => {
     windowId,
     data: WsBilldDeskBehaviorType['data']
   ) {
+    if (isTauri()) {
+      const actionMap: Record<number, string> = {
+        [BilldDeskBehaviorEnum.mouseMove]: 'mouseMove',
+        [BilldDeskBehaviorEnum.mouseDrag]: 'mouseDrag',
+        [BilldDeskBehaviorEnum.pressButtonLeft]: 'pressButtonLeft',
+        [BilldDeskBehaviorEnum.pressButtonRight]: 'pressButtonRight',
+        [BilldDeskBehaviorEnum.releaseButtonLeft]: 'releaseButtonLeft',
+        [BilldDeskBehaviorEnum.releaseButtonRight]: 'releaseButtonRight',
+        [BilldDeskBehaviorEnum.setPosition]: 'setPosition',
+        [BilldDeskBehaviorEnum.doubleClick]: 'doubleClick',
+        [BilldDeskBehaviorEnum.leftClick]: 'leftClick',
+        [BilldDeskBehaviorEnum.rightClick]: 'rightClick',
+        [BilldDeskBehaviorEnum.scrollDown]: 'scrollDown',
+        [BilldDeskBehaviorEnum.scrollUp]: 'scrollUp',
+        [BilldDeskBehaviorEnum.keyboardType]: 'keyboardType',
+        [BilldDeskBehaviorEnum.keyboardPressKey]: 'keyboardPressKey',
+        [BilldDeskBehaviorEnum.keyboardReleaseKey]: 'keyboardReleaseKey',
+      };
+
+      const actionName =
+        typeof data.type === 'number'
+          ? actionMap[data.type] || 'unknown'
+          : String(data.type);
+
+      let keyVal: string | undefined;
+      if (Array.isArray(data.key)) {
+        keyVal = String(data.key[0] || '');
+      } else if (typeof data.key === 'string') {
+        keyVal = data.key;
+      }
+
+      import('@tauri-apps/api/core').then(({ invoke }) => {
+        invoke('simulate_input', {
+          payload: {
+            action: actionName,
+            x: data.x,
+            y: data.y,
+            amount: data.amount,
+            key: keyVal,
+          },
+        }).catch((err) => {
+          console.error('Tauri simulate_input error:', err);
+        });
+      });
+      return;
+    }
+
     const x =
       (appStore.primaryDisplaySize.width || 0) *
       appStore.scaleFactor *
@@ -242,6 +290,28 @@ export const useIpcRendererSend = () => {
     }
   }
 
+  async function handleGetLoginItemSettings() {
+    if (!ipcRenderer) return false;
+    const res = await ipcRendererInvoke({
+      windowId: 0,
+      channel: IPC_EVENT.getLoginItemSettings,
+      requestId: getRandomString(8),
+      data: {},
+    });
+    return !!res?.data?.openAtLogin;
+  }
+
+  async function handleSetLoginItemSettings(openAtLogin: boolean) {
+    if (!ipcRenderer) return false;
+    const res = await ipcRendererInvoke({
+      windowId: 0,
+      channel: IPC_EVENT.setLoginItemSettings,
+      requestId: getRandomString(8),
+      data: { openAtLogin },
+    });
+    return !!res?.data?.openAtLogin;
+  }
+
   return {
     mouseDoubleClick,
     mouseDrag,
@@ -264,5 +334,7 @@ export const useIpcRendererSend = () => {
     handleScreen,
     handleOpenExternal,
     handleRtcBilldDeskBehavior,
+    handleGetLoginItemSettings,
+    handleSetLoginItemSettings,
   };
 };

@@ -90,6 +90,8 @@ export enum WsMsgTypeEnum {
   billdDeskOffer = 'billdDeskOffer',
   billdDeskAnswer = 'billdDeskAnswer',
   billdDeskCandidate = 'billdDeskCandidate',
+  billdDeskClipboard = 'billdDeskClipboard',
+  billdDeskCloseRemote = 'billdDeskCloseRemote',
 }
 
 /** 发送消息统一格式 */
@@ -381,4 +383,8 @@ export type WsBilldDeskStartRemoteResult = IResWsFormat<{
   code: number;
   msg: string;
   data?: WsBilldDeskStartRemote['data'];
+}>;
+
+export type WsBilldDeskClipboardType = IReqWsFormat<{
+  text: string;
 }>;

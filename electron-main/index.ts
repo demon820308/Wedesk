@@ -7,10 +7,12 @@ import {
   desktopCapturer,
   ipcMain,
   Menu,
+  nativeImage,
   powerMonitor,
   powerSaveBlocker,
   screen,
   shell,
+  Tray,
 } from 'electron';
 
 import { IPC_EVENT } from '../src/event';
@@ -46,6 +48,13 @@ process.env.VITE_PUBLIC = app.isPackaged
   ? process.env.DIST
   : path.join(process.env.DIST, '../public');
 
+if (!app.isPackaged) {
+  app.setPath(
+    'userData',
+    path.join(app.getPath('appData'), `${app.getName()}-dev`)
+  );
+}
+
 if (!app.requestSingleInstanceLock()) {
   app.quit();
   process.exit(0);
@@ -56,6 +65,62 @@ let winBounds: Electron.Rectangle | null;
 const mainWindowId = WINDOW_ID_ENUM.remote;
 const windowMap = new Map<number, BrowserWindow>();
 const appName = app.getName();
+let tray: Tray | null = null;
+let isQuitting = false;
+
+function createTray() {
+  if (tray) return;
+  const iconPath = path.join(__dirname, '../public/favicon.ico');
+  const icon = nativeImage.createFromPath(iconPath);
+  tray = new Tray(icon);
+  tray.setToolTip('Wedesk 远程桌面');
+
+  const contextMenu = Menu.buildFromTemplate([
+    {
+      label: '显示主界面',
+      click: () => {
+        const win = windowMap.get(mainWindowId);
+        if (win) {
+          if (!win.isVisible()) win.show();
+          if (win.isMinimized()) win.restore();
+          win.focus();
+        }
+      },
+    },
+    { type: 'separator' },
+    {
+      label: '退出 Wedesk',
+      click: () => {
+        isQuitting = true;
+        app.quit();
+      },
+    },
+  ]);
+
+  tray.setContextMenu(contextMenu);
+
+  tray.on('click', () => {
+    const win = windowMap.get(mainWindowId);
+    if (win) {
+      if (win.isVisible() && !win.isMinimized()) {
+        win.hide();
+      } else {
+        if (!win.isVisible()) win.show();
+        if (win.isMinimized()) win.restore();
+        win.focus();
+      }
+    }
+  });
+
+  tray.on('double-click', () => {
+    const win = windowMap.get(mainWindowId);
+    if (win) {
+      if (!win.isVisible()) win.show();
+      if (win.isMinimized()) win.restore();
+      win.focus();
+    }
+  });
+}
 
 async function createWindow({
   windowId,
@@ -105,7 +170,10 @@ async function createWindow({
   windowMap.set(windowId, win);
 
   win.webContents.on('before-input-event', (_event, input) => {
-    if (input.key === 'F12' || (input.control && input.shift && input.key.toLowerCase() === 'i')) {
+    if (
+      input.key === 'F12' ||
+      (input.control && input.shift && input.key.toLowerCase() === 'i')
+    ) {
       win.webContents.toggleDevTools();
     }
   });
@@ -180,10 +248,9 @@ function main() {
     height: windowNormalParams.height,
     minWidth: windowNormalParams.width,
     minHeight: windowNormalParams.height,
-    maxWidth: windowNormalParams.width,
-    maxHeight: windowNormalParams.height,
     // 隐藏菜单栏
     autoHideMenuBar: true,
+    icon: path.join(__dirname, '../public/favicon.ico'),
     webPreferences: {
       // devTools: true,
       // nodeIntegration: true, // 在网页中集成Node
@@ -199,8 +266,32 @@ function main() {
   }
 
   windowMap.set(mainWindowId, mainWindow);
+  createTray();
 
-  mainWindow.on('close', () => {
+  mainWindow.on('maximize', () => {
+    winWebContentsSend({
+      windowId: mainWindowId,
+      channel: IPC_EVENT.response_windowMaximize,
+      requestId: '',
+      data: { isMaximized: true },
+    });
+  });
+
+  mainWindow.on('unmaximize', () => {
+    winWebContentsSend({
+      windowId: mainWindowId,
+      channel: IPC_EVENT.response_windowMaximize,
+      requestId: '',
+      data: { isMaximized: false },
+    });
+  });
+
+  mainWindow.on('close', (event) => {
+    if (!isQuitting) {
+      event.preventDefault();
+      mainWindow.hide();
+      return;
+    }
     console.log('mainWindow-close');
     windowMap.forEach((item) => {
       if (!item?.isDestroyed()) {
@@ -390,13 +481,18 @@ function main() {
 
   ipcMain.on(IPC_EVENT.closeAllWindow, (_event, reqData: IIpcRendererData) => {
     console.log(`electron收到${IPC_EVENT.closeAllWindow}`, reqData);
-    windowMap.forEach((item) => {
-      if (!item?.isDestroyed()) {
-        item.removeAllListeners();
-        item.close();
-      }
-    });
-    windowMap.clear();
+    const win = windowMap.get(mainWindowId);
+    if (win && !isQuitting) {
+      win.hide();
+    } else {
+      windowMap.forEach((item) => {
+        if (!item?.isDestroyed()) {
+          item.removeAllListeners();
+          item.close();
+        }
+      });
+      windowMap.clear();
+    }
   });
 
   ipcMain.on(IPC_EVENT.closeWindow, (_event, reqData: IIpcRendererData) => {
@@ -404,7 +500,11 @@ function main() {
     const { data } = reqData;
     const { windowId } = data;
     const win = windowMap.get(windowId);
-    win?.close();
+    if (windowId === mainWindowId && !isQuitting) {
+      win?.hide();
+    } else {
+      win?.close();
+    }
   });
 
   ipcMain.on(IPC_EVENT.windowMinimize, (_event, reqData: IIpcRendererData) => {
@@ -420,7 +520,11 @@ function main() {
     const { data } = reqData;
     const { windowId } = data;
     const win = windowMap.get(windowId);
-    win?.maximize();
+    if (win?.isMaximized()) {
+      win.unmaximize();
+    } else {
+      win?.maximize();
+    }
   });
 
   ipcMain.on(
@@ -1036,7 +1140,7 @@ function main() {
           // https://github.com/electron/electron/issues/20320
           // https://github.com/electron/electron/issues/10862
           if (!win?.isDestroyed()) {
-            win.setBounds(winBounds);
+            win.setSize(winBounds.width, winBounds.height);
           }
         }
         win?.setPosition(x, y);
@@ -1060,7 +1164,7 @@ function main() {
           // https://github.com/electron/electron/issues/20320
           // https://github.com/electron/electron/issues/10862
           if (!win?.isDestroyed()) {
-            win.setBounds(winBounds);
+            win.setSize(winBounds.width, winBounds.height);
           }
         }
         win?.setPosition(x, y);
@@ -1141,6 +1245,41 @@ function main() {
       });
     }
   });
+
+  ipcMain.handle(
+    IPC_EVENT.getLoginItemSettings,
+    (_event, reqData: IIpcRendererData) => {
+      console.log(`electron收到${IPC_EVENT.getLoginItemSettings}`, reqData);
+      const { requestId, data } = reqData || {};
+      const windowId = data?.windowId || 0;
+      const openAtLogin = app.getLoginItemSettings().openAtLogin;
+      return {
+        windowId,
+        requestId,
+        data: { openAtLogin },
+        code: 0,
+      };
+    }
+  );
+
+  ipcMain.handle(
+    IPC_EVENT.setLoginItemSettings,
+    (_event, reqData: IIpcRendererData) => {
+      console.log(`electron收到${IPC_EVENT.setLoginItemSettings}`, reqData);
+      const { requestId, data } = reqData || {};
+      const windowId = data?.windowId || 0;
+      const openAtLogin = !!data?.openAtLogin;
+      app.setLoginItemSettings({
+        openAtLogin,
+      });
+      return {
+        windowId,
+        requestId,
+        data: { openAtLogin: app.getLoginItemSettings().openAtLogin },
+        code: 0,
+      };
+    }
+  );
 
   ipcMain.handle(IPC_EVENT.scaleFactor, (_event, reqData: IIpcRendererData) => {
     console.log(`electron收到${IPC_EVENT.scaleFactor}`, reqData);
@@ -1273,9 +1412,15 @@ app.on('ready', () => {
   main();
 });
 
+app.on('before-quit', () => {
+  isQuitting = true;
+});
+
 app.on('window-all-closed', () => {
-  app.quit();
-  windowMap.clear();
+  if (isQuitting) {
+    app.quit();
+    windowMap.clear();
+  }
 });
 
 // app.whenReady().then(main);

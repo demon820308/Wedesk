@@ -429,6 +429,7 @@ export class WebRTCClass {
             msg: 'iceConnectionState:closed',
             type: 'error',
           });
+          this.close();
         }
       }
     );
@@ -470,6 +471,7 @@ export class WebRTCClass {
             msg: 'connectionState:closed',
             type: 'error',
           });
+          this.close();
         }
         if (connectionState === 'failed') {
           // 表示至少有一个 ICE 连接处于 failed 的状态。
@@ -504,12 +506,18 @@ export class WebRTCClass {
     requestId: string;
     data?: T;
   }) => {
-    if (this.dataChannel?.readyState !== 'open') {
+    let activeChannel: RTCDataChannel | null = null;
+    if (this.dataChannel?.readyState === 'open') {
+      activeChannel = this.dataChannel;
+    } else if (this.cbDataChannel?.readyState === 'open') {
+      activeChannel = this.cbDataChannel;
+    }
+    if (!activeChannel) {
       console.error('dataChannel未连接成功，不发送消息！', msgType, data);
       return;
     }
     console.log('dataChannel发送消息', msgType);
-    this.dataChannel.send(
+    activeChannel.send(
       JSON.stringify({
         msgType,
         requestId,
@@ -562,6 +570,13 @@ export class WebRTCClass {
       });
       this.peerConnection.ondatachannel = (event) => {
         this.cbDataChannel = event.channel;
+        this.cbDataChannel.onclose = () => {
+          this.prettierLog({
+            msg: 'cbDataChannel已关闭！',
+            type: 'warn',
+          });
+          this.close();
+        };
         this.update();
       };
       this.dataChannel = this.peerConnection.createDataChannel(
@@ -579,6 +594,13 @@ export class WebRTCClass {
           msg: 'dataChannel连接成功！',
           type: 'success',
         });
+      };
+      this.dataChannel.onclose = () => {
+        this.prettierLog({
+          msg: 'dataChannel已关闭！',
+          type: 'warn',
+        });
+        this.close();
       };
       this.dataChannel.onerror = () => {
         this.prettierLog({
@@ -606,23 +628,17 @@ export class WebRTCClass {
       this.localStream = null;
       this.peerConnection?.close();
       this.dataChannel?.close();
+      this.cbDataChannel?.close();
       this.peerConnection = null;
       this.dataChannel = null;
+      this.cbDataChannel = null;
       this.videoEl.remove();
       const appStore = useAppStore();
       const networkStore = useNetworkStore();
-      appStore.remoteDesk.set(this.receiver, {
-        sender: this.receiver,
-        isClose: true,
-        maxBitrate: -1,
-        maxFramerate: -1,
-        resolutionRatio: -1,
-        videoContentHint: '',
-        audioContentHint: '',
-        deskUserUuid: this.deskUserUuid,
-        remoteDeskUserUuid: this.remoteDeskUserUuid,
-      });
+      appStore.remoteDesk.delete(this.receiver);
+      appStore.remoteDesk.delete(this.sender);
       networkStore.rtcMap.delete(this.receiver);
+      networkStore.rtcMap.delete(this.sender);
     } catch (error) {
       console.error(
         '手动关闭webrtc连接失败',

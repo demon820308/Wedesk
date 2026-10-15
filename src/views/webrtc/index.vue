@@ -261,6 +261,7 @@ import { useNetworkStore } from '@/store/network';
 import {
   BilldDeskBehaviorEnum,
   WsBilldDeskBehaviorType,
+  WsBilldDeskClipboardType,
   WsBilldDeskStartRemote,
   WsBilldDeskStartRemoteResult,
   WsChangeAudioContentHintType,
@@ -277,6 +278,7 @@ import {
   ipcRendererSend,
   videoFullBox,
 } from '@/utils';
+import { isTauri } from '@/utils/desktopBridge';
 
 const route = useRoute();
 const appStore = useAppStore();
@@ -317,6 +319,25 @@ const currentMaxFramerate = ref(maxFramerate.value[4].value);
 const currentResolutionRatio = ref(resolutionRatio.value[3].value);
 const currentVideoContentHint = ref(videoContentHint.value[3].value);
 const currentAudioContentHint = ref(audioContentHint.value[0].value);
+const lastSyncedText = ref('');
+
+async function syncClipboardToHost() {
+  try {
+    const text = await navigator.clipboard?.readText?.();
+    if (text && text !== lastSyncedText.value) {
+      lastSyncedText.value = text;
+      networkStore.rtcMap
+        .get(receiverId.value)
+        ?.dataChannelSend<WsBilldDeskClipboardType['data']>({
+          requestId: getRandomString(8),
+          msgType: WsMsgTypeEnum.billdDeskClipboard,
+          data: { text },
+        });
+    }
+  } catch (e) {
+    // Non-focused or denied
+  }
+}
 
 let clickTimer: any;
 let isLongClick = false;
@@ -400,7 +421,42 @@ onMounted(() => {
   window.addEventListener('resize', handleResize);
 });
 
+function notifyCloseRemote() {
+  networkStore.rtcMap.forEach((rtc) => {
+    try {
+      rtc.dataChannelSend?.({
+        requestId: getRandomString(8),
+        msgType: WsMsgTypeEnum.billdDeskCloseRemote,
+        data: {
+          roomId: roomId.value,
+          sender: mySocketId.value,
+          receiver: receiverId.value,
+          remoteDeskUserUuid: remoteDeskUserUuid.value,
+        },
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  });
+
+  try {
+    networkStore.wsMap.get(roomId.value)?.send({
+      requestId: getRandomString(8),
+      msgType: WsMsgTypeEnum.billdDeskCloseRemote,
+      data: {
+        roomId: roomId.value,
+        sender: mySocketId.value,
+        receiver: receiverId.value,
+        remoteDeskUserUuid: remoteDeskUserUuid.value,
+      },
+    });
+  } catch (e) {
+    console.error(e);
+  }
+}
+
 onUnmounted(() => {
+  notifyCloseRemote();
   clearInterval(loopBilldDeskUpdateUserTimer.value);
   videoWrapRef.value?.removeEventListener('wheel', handleMouseWheel);
   window.removeEventListener('resize', handleResize);
@@ -408,6 +464,7 @@ onUnmounted(() => {
   window.removeEventListener('keydown', handleKeyCombination);
 
   window.removeEventListener('keyup', handleKeyUp);
+  window.removeEventListener('focus', syncClipboardToHost);
   networkStore.removeAllWsAndRtc();
 });
 
@@ -424,6 +481,12 @@ function handleOpenDebug() {
 
 function handleKeyCombination(event: KeyboardEvent) {
   if (isWatchMode.value) return;
+  if (event.ctrlKey || event.metaKey) {
+    const k = event.key.toLowerCase();
+    if (k === 'v' || k === 'c') {
+      setTimeout(syncClipboardToHost, 60);
+    }
+  }
   if (event.ctrlKey) {
     const key = event.key.toLowerCase();
     ENGLISH_LETTER.forEach((item) => {
@@ -498,6 +561,7 @@ function init() {
   window.addEventListener('keydown', handleKeyDown);
   window.addEventListener('keydown', handleKeyCombination);
   window.addEventListener('keyup', handleKeyUp);
+  window.addEventListener('focus', syncClipboardToHost);
   initWs({
     roomId: roomId.value,
     isAnchor: false,
@@ -651,6 +715,10 @@ function handleWsMsg() {
       }
     }
   );
+  ws?.socketIo?.off?.(WsMsgTypeEnum.billdDeskCloseRemote);
+  ws?.socketIo?.on(WsMsgTypeEnum.billdDeskCloseRemote, () => {
+    handleRemoteDisconnected();
+  });
   ws?.send<WsBilldDeskStartRemote['data']>({
     requestId: getRandomString(8),
     msgType: WsMsgTypeEnum.billdDeskStartRemote,
@@ -762,9 +830,37 @@ function handleMouseWheel(event: WheelEvent) {
   }
 }
 
-function handleClose() {
+let hasShownDisconnectTip = false;
+
+async function handleRemoteDisconnected() {
+  if (hasShownDisconnectTip) return;
+  hasShownDisconnectTip = true;
+  try {
+    await useTip({
+      title: '提示',
+      content: '远程桌面连接已断开',
+      hiddenCancel: true,
+      hiddenClose: true,
+      confirmButtonText: '确定',
+    });
+  } catch (e) {
+    // ignore
+  }
+  await handleClose();
+}
+
+async function handleClose() {
+  notifyCloseRemote();
+  await new Promise((resolve) => setTimeout(resolve, 150));
   networkStore.removeAllWsAndRtc();
-  if (!ipcRenderer) {
+  if (isTauri()) {
+    try {
+      const { getCurrentWindow } = await import('@tauri-apps/api/window');
+      await getCurrentWindow().close();
+    } catch (e) {
+      window.close();
+    }
+  } else if (!ipcRenderer) {
     router.push({ name: routerName.remote });
     setTimeout(() => {
       windowReload();
@@ -825,16 +921,44 @@ watch(
   () => networkStore.rtcMap,
   (newVal) => {
     newVal.forEach((item) => {
-      if (videoWrapRef.value) {
-        if (videoMap.value.has(item.receiver)) {
-          if (item.peerConnection?.iceConnectionState === 'connected') {
-            loading.value = false;
+      const setupChannelListener = (channel: RTCDataChannel | null) => {
+        if (!channel) return;
+        channel.onmessage = async (event) => {
+          try {
+            const jsondata = JSON.parse(event.data);
+            if (jsondata.msgType === WsMsgTypeEnum.billdDeskClipboard) {
+              const text = jsondata.data?.text;
+              if (text && text !== lastSyncedText.value) {
+                lastSyncedText.value = text;
+                await navigator.clipboard?.writeText?.(text);
+              }
+            }
+          } catch (e) {
+            console.error(e);
           }
+        };
+      };
+      setupChannelListener(item.dataChannel);
+      setupChannelListener(item.cbDataChannel);
+
+      if (videoWrapRef.value) {
+        const ice = item.peerConnection?.iceConnectionState;
+        const conn = item.peerConnection?.connectionState;
+        if (
+          ice === 'connected' ||
+          ice === 'completed' ||
+          conn === 'connected'
+        ) {
+          loading.value = false;
+        }
+
+        if (videoMap.value.has(item.receiver)) {
           return;
         }
 
         videoMap.value.set(item.receiver, 1);
         item.videoEl.addEventListener('loadedmetadata', async () => {
+          loading.value = false;
           const res1 = await ipcRendererInvoke({
             windowId: windowId.value,
             channel: IPC_EVENT.getWindowTitlebarHeight,
@@ -846,6 +970,66 @@ watch(
           }
           handleVideoElSize(item.videoEl, true);
         });
+        item.videoEl.addEventListener('playing', () => {
+          loading.value = false;
+        });
+        item.peerConnection?.addEventListener('connectionstatechange', () => {
+          const state = item.peerConnection?.connectionState;
+          if (state === 'connected') {
+            loading.value = false;
+          } else if (
+            state === 'disconnected' ||
+            state === 'failed' ||
+            state === 'closed'
+          ) {
+            handleRemoteDisconnected();
+          }
+        });
+        item.peerConnection?.addEventListener(
+          'iceconnectionstatechange',
+          () => {
+            const s = item.peerConnection?.iceConnectionState;
+            if (s === 'connected' || s === 'completed') {
+              loading.value = false;
+            } else if (
+              s === 'disconnected' ||
+              s === 'failed' ||
+              s === 'closed'
+            ) {
+              handleRemoteDisconnected();
+            }
+          }
+        );
+
+        const handleDataChannelMessage = (event: MessageEvent) => {
+          try {
+            const msg = JSON.parse(event.data);
+            if (msg?.msgType === WsMsgTypeEnum.billdDeskCloseRemote) {
+              handleRemoteDisconnected();
+            }
+          } catch (e) {
+            // ignore
+          }
+        };
+
+        if (item.dataChannel) {
+          item.dataChannel.addEventListener('close', () => {
+            handleRemoteDisconnected();
+          });
+          item.dataChannel.addEventListener(
+            'message',
+            handleDataChannelMessage
+          );
+        }
+        if (item.cbDataChannel) {
+          item.cbDataChannel.addEventListener('close', () => {
+            handleRemoteDisconnected();
+          });
+          item.cbDataChannel.addEventListener(
+            'message',
+            handleDataChannelMessage
+          );
+        }
         videoList.value.push(item.videoEl);
         videoWrapRef.value.appendChild(item.videoEl);
       }

@@ -8,3 +8,5 @@ deploy
 electron-release
 electron-dist
 .wrangler
+src-tauri/target
+src-tauri/gen

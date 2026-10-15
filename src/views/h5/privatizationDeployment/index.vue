@@ -82,9 +82,7 @@
         <div>qq号：{{ AUTHOR_INFO.qq }}</div>
         <div>添加时请备注：<b>Wedesk私有化部署</b></div>
         <b style="color: red">
-          <span>
-            注意：项目开源，个人用户有问题 GitHub 提 Issue 即可！
-          </span>
+          <span> 注意：项目开源，个人用户有问题 GitHub 提 Issue 即可！ </span>
         </b>
       </div>
     </n-card>

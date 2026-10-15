@@ -15,6 +15,7 @@ export const mobileRouterName = {
 };
 
 export const routerName = {
+  host: 'host',
   remote: 'remote',
   home: 'home',
   about: 'about',
@@ -36,8 +37,13 @@ export const defaultRoutes: RouteRecordRaw[] = [
     name: routerName.home,
     path: '/',
     component: Layout,
-    redirect: routerName.remote,
+    redirect: routerName.host,
     children: [
+      {
+        name: routerName.host,
+        path: '/host',
+        component: () => import('@/views/host/index.vue'),
+      },
       {
         name: routerName.remote,
         path: '/remote',

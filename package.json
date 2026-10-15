@@ -23,11 +23,15 @@
     "deploy:beta": "node ./deploy/index.cjs --beta",
     "deploy:prod": "node ./deploy/index.cjs --prod",
     "dev": "rimraf electron-dist dist && vite",
+    "dev:web": "cross-env VITE_APP_RELEASE_PROJECT_ISWEB=true vite",
     "gen-icons": "electron-icon-builder --input=./build/source/billd.png --output=./build/ --flatten",
     "lint": "eslint . --config ./eslint.config.js --cache",
     "lint:fix": "eslint . --config ./eslint.config.js --cache --fix",
     "preview": "vite preview",
-    "release": "standard-version"
+    "release": "standard-version",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
   },
   "config": {
     "commitizen": {
@@ -63,6 +67,8 @@
     "@electron-toolkit/preload": "^3.0.0",
     "@electron/rebuild": "^3.6.0",
     "@eslint/js": "^9.10.0",
+    "@tauri-apps/api": "^2.12.4",
+    "@tauri-apps/cli": "^2.12.3",
     "@types/node": "^20.4.1",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",

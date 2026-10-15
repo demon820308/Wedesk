@@ -330,7 +330,11 @@ export class SignalingHub {
         }
         this.socketIdMap.delete(session.socketId);
         if (session.roomId && this.rooms.has(session.roomId)) {
-          this.rooms.get(session.roomId)?.delete(ws);
+          const room = this.rooms.get(session.roomId);
+          room?.delete(ws);
+          room?.forEach((client) => {
+            this.emitTo(client, 'billdDeskCloseRemote', { sender: session.socketId });
+          });
         }
       }
       this.sockets.delete(ws);
@@ -422,12 +426,17 @@ export class SignalingHub {
       event === 'billdDeskOffer' ||
       event === 'billdDeskAnswer' ||
       event === 'billdDeskCandidate' ||
-      event === 'billdDeskBehavior'
+      event === 'billdDeskBehavior' ||
+      event === 'billdDeskCloseRemote'
     ) {
       const targetSocketId = payload?.data?.receiver;
-      const targetWs = targetSocketId
+      let targetWs = targetSocketId
         ? this.socketIdMap.get(targetSocketId)
         : undefined;
+
+      if (!targetWs && payload?.data?.remoteDeskUserUuid) {
+        targetWs = this.uuidMap.get(String(payload.data.remoteDeskUserUuid));
+      }
 
       if (targetWs) {
         this.emitTo(targetWs, event, payload.data);

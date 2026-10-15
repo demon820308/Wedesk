@@ -38,6 +38,8 @@ export const IPC_EVENT = {
   shellOpenExternal: 'shellOpenExternal',
   globalShortcut: 'globalShortcut',
   getPlatform: 'getPlatform',
+  getLoginItemSettings: 'getLoginItemSettings',
+  setLoginItemSettings: 'setLoginItemSettings',
 
   response_commonTest: 'response_commonTest',
   response_powerSaveBlockerStart: 'response_powerSaveBlockerStart',
