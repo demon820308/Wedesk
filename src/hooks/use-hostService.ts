@@ -257,6 +257,7 @@ export function useHostService() {
     watch(
       () => appStore.remoteDesk.size,
       async (newval) => {
+        if (window.location.hash.includes('webrtc')) return;
         if (newval) {
           if (!anchorStream.value) {
             await startScreenCapture();
@@ -370,6 +371,12 @@ export function useHostService() {
 
   async function startScreenCapture() {
     if (anchorStream.value || isCapturingScreen) return;
+    if (
+      window.location.hash.includes('webrtc') ||
+      window.location.hash.includes('remote')
+    ) {
+      return;
+    }
     if (ipcRenderer) {
       handleScreen({ windowId: WINDOW_ID_ENUM.remote });
       return;
@@ -388,6 +395,10 @@ export function useHostService() {
       } finally {
         isCapturingScreen = false;
       }
+      return;
+    }
+    // 纯网页环境：仅在处于受控端页面（/#/host）且开启允许被控时才允许触发浏览器屏幕共享
+    if (!window.location.hash.includes('host') || cacheStore.allowControl === false) {
       return;
     }
     isCapturingScreen = true;
