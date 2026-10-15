@@ -1,6 +1,5 @@
 import { getRandomString } from 'billd-utils';
 
-import { COTURN_URL } from '@/constant';
 import { LiveLineEnum, MediaTypeEnum } from '@/interface';
 import { AppRootState, useAppStore } from '@/store/app';
 import { useNetworkStore } from '@/store/network';

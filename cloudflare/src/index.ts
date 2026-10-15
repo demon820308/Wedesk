@@ -51,8 +51,8 @@ export default {
       return hub.fetch(request);
     }
 
-    // 3. 处理内部 API (查询设备是否在线)
-    if (url.pathname === '/internal/check_online') {
+    // 3. 处理内部 API (查询设备是否在线或连接状态)
+    if (url.pathname.startsWith('/internal/')) {
       const id = env.SIGNALING_HUB.idFromName('global-signaling-hub');
       const hub = env.SIGNALING_HUB.get(id);
       return hub.fetch(request);
@@ -225,12 +225,26 @@ export class SignalingHub {
 
     // 内部查询接口: 根据 uuid 获取对应在线 socket_id
     if (url.pathname === '/get_socket_by_uuid') {
-      const targetUuid = url.searchParams.get('uuid');
+      const targetUuid = url.searchParams.get('uuid')?.trim();
       const ws = targetUuid ? this.uuidMap.get(targetUuid) : undefined;
       const session = ws ? this.sockets.get(ws) : undefined;
       return new Response(JSON.stringify({ socketId: session?.socketId || '' }), {
         headers: { 'Content-Type': 'application/json' },
       });
+    }
+
+    if (url.pathname === '/internal/status') {
+      const activeUuids: string[] = [];
+      for (const [uuid] of this.uuidMap.entries()) {
+        activeUuids.push(uuid);
+      }
+      return new Response(
+        JSON.stringify({
+          activeConnections: this.sockets.size,
+          activeUuids,
+        }),
+        { headers: { 'Content-Type': 'application/json' } }
+      );
     }
 
     // 升级 WebSocket
@@ -277,14 +291,15 @@ export class SignalingHub {
         return;
       }
 
-      // Socket.IO EVENT 消息: 42["event", data]
-      if (raw.startsWith('42')) {
+      // Socket.IO EVENT 消息: 42["event", data] 或带 ack ID 如 420[...]
+      const match = raw.match(/^42\d*(.*)$/);
+      if (match && match[1]) {
         try {
-          const parsed = JSON.parse(raw.substring(2));
+          const parsed = JSON.parse(match[1]);
           const [event, payload] = parsed;
           this.handleSocketEvent(ws, socketId, event, payload);
         } catch (e) {
-          console.error('Parse Socket.IO packet error', e);
+          console.error('Parse Socket.IO packet error', e, raw);
         }
       }
     });
@@ -292,7 +307,9 @@ export class SignalingHub {
     const cleanup = () => {
       const session = this.sockets.get(ws);
       if (session) {
-        if (session.uuid) this.uuidMap.delete(session.uuid);
+        if (session.uuid && this.uuidMap.get(session.uuid) === ws) {
+          this.uuidMap.delete(session.uuid);
+        }
         this.socketIdMap.delete(session.socketId);
         if (session.roomId && this.rooms.has(session.roomId)) {
           this.rooms.get(session.roomId)?.delete(ws);
@@ -317,8 +334,13 @@ export class SignalingHub {
     // 1. 客户端上线加入房间 / 状态心跳上报
     if (event === 'billdDeskJoin' || event === 'billdDeskUpdateUser') {
       const data = payload?.data || {};
-      const deskUserUuid = data.deskUserUuid;
-      const roomId = data.live_room_id || data.roomId || deskUserUuid;
+      const deskUserUuid = (
+        data.deskUserUuid ||
+        (event === 'billdDeskJoin' ? data.live_room_id : '') ||
+        data.roomId ||
+        ''
+      ).toString().trim();
+      const roomId = (data.live_room_id || data.roomId || deskUserUuid || '').toString().trim();
 
       if (deskUserUuid) {
         session.uuid = deskUserUuid;
@@ -347,8 +369,8 @@ export class SignalingHub {
     // 2. 发起远程连接请求
     if (event === 'billdDeskStartRemote') {
       const data = payload?.data || {};
-      const targetUuid = data.remoteDeskUserUuid;
-      const targetWs = this.uuidMap.get(targetUuid);
+      const targetUuid = String(data.remoteDeskUserUuid || '').trim();
+      const targetWs = targetUuid ? this.uuidMap.get(targetUuid) : undefined;
       const targetSession = targetWs ? this.sockets.get(targetWs) : undefined;
 
       if (targetWs && targetSession) {

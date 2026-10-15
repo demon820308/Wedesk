@@ -520,6 +520,8 @@ async function handleInit() {
   handleLoopBilldDeskUpdateUserTimer();
   initWs({
     roomId: roomId.value,
+    deskUserUuid: cacheStore.deskUserUuid,
+    deskUserPassword: cacheStore.deskUserPassword,
     isAnchor: false,
     isRemoteDesk: true,
   });
@@ -919,6 +921,7 @@ async function startRemote() {
     const res = await fetchFindReceiverByUuid(cacheStore.remoteDeskUserUuid);
     if (res.code === 200) {
       if (res.data.receiver !== '') {
+        receiverId.value = res.data.receiver;
         const old = cacheStore.linkDeviceList.find(
           (v) => v.remoteDeskUserUuid === cacheStore.remoteDeskUserUuid
         );

@@ -813,12 +813,20 @@ export const useWebsocket = () => {
     isAnchor: boolean;
     roomId: string;
     isRemoteDesk?: boolean;
+    deskUserUuid?: string;
+    deskUserPassword?: string;
     currentResolutionRatio?: number;
     currentMaxFramerate?: number;
     currentMaxBitrate?: number;
   }) {
     roomId.value = data.roomId;
     isAnchor.value = data.isAnchor;
+    if (data.deskUserUuid) {
+      deskUserUuid.value = data.deskUserUuid;
+    }
+    if (data.deskUserPassword) {
+      deskUserPassword.value = data.deskUserPassword;
+    }
     if (data.isRemoteDesk) {
       isRemoteDesk.value = data.isRemoteDesk;
     }
