@@ -1,5 +1,3 @@
-﻿Wedesk Pro | [Wedesk 开源版](./README_OpenSource.md)
-
 <p align="center">
   <a href="https://desk.hsslive.cn" target="_blank">
     <img
@@ -301,7 +299,6 @@ Api：
 
 ## Wedesk Pro源码
 
-- Wedesk开源：[源码](./README_OpenSource.md)
 - Wedesk Pro不开源，源码需要购买：[https://desk.hsslive.cn/#/price](https://desk.hsslive.cn/#/price)
 
 
