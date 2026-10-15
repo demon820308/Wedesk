@@ -1,305 +1,203 @@
-<p align="center">
-  <a href="https://desk.hsslive.cn" target="_blank">
-    <img
-      width="200"
-      src="https://github.com/demon820308/Wedesk/blob/main/readme_img/icon.png"
-    />
-  </a>
-</p>
-
-<h1 align="center">
-  Wedesk Pro
-</h1>
-
-<p align="center">
-  跨平台远程桌面控制，实现了类似 ToDesk/向日葵等远程软件的功能。
-</p>
-
-## 实测
-
-- [x] 支持2K + 60 Fps
-  - [x] 被控端：系统：Windows 10，显卡：NVIDIA GeForce RTX 3060 Laptop
-  - [x] 主控端：Chrome浏览器/Wedesk客户端
-- [x] 支持2K + 120 Fps
-  - [x] 被控端：系统：Windows 11，显卡：NVIDIA GeForce RTX 5070
-  - [x] 主控端：Chrome浏览器/Wedesk客户端
-- [x] 支持1080P + 60 Fps
-  - [x] 被控端：系统：Windows 10，显卡：NVIDIA GeForce RTX 2070 Laptop
-  - [x] 主控端：Chrome浏览器/Wedesk客户端
-- [x] 支持1080P + 60 Fps
-  - [x] 被控端：系统：Windows 10，显卡：NVIDIA GeForce GTX 1060 6G
-  - [x] 主控端：Chrome浏览器/Wedesk客户端
-
-## 功能
-
-- [x] `web网页` 控制 `电脑端`
-- [x] `web网页` 控制 `安卓端`
-- [x] `web网页` 控制 `web网页`（仅观看）
-- [x] `电脑端` 控制 `电脑端`
-- [x] `电脑端` 控制 `安卓端`
-- [x] `电脑端` 控制 `web网页`（仅观看）
-- [x] `安卓端` 控制 `电脑端`
-- [x] `安卓端` 控制 `安卓端`
-- [x] `安卓端` 控制 `web网页`（仅观看）
-- [x] 硬件加速
-  - [x] 开启/关闭编码硬件加速
-  - [x] 开启/关闭解码硬件加速
-  - [x] 开启/关闭零拷贝
-  - [x] NVIDIA显卡（H264/H265/AV1），显卡驱动需要570.0+版本
-  - [x] AMD显卡（H264/H265/AV1）
-- [x] 主流编解码协议
-  - [x] H264/H265
-  - [x] AV1
-  - [x] VP8/VP9
-- [x] 驱动级键鼠（避免游戏风控）
-- [x] 鼠标模式
-  - [x] 使用主控端鼠标
-  - [x] 使用被控端鼠标（fps游戏）
-  - [x] 智能鼠标
-- [x] 屏幕墙
-  - [x] 支持Windows/macOS/Android
-  - [x] 支持单控
-  - [x] 支持群控
-- [x] 多台设备同时远程一台设备
-- [x] 一台设备同时远程多台设备
-- [x] 多屏操作
-- [x] 连接鉴权
-- [x] 自定义设备码/连接密码
-- [x] 自定义中继服务器
-- [x] 自定义接口（wss、api）
-- [x] 码率/帧率/画质调整
-- [x] 按键映射
-- [x] 剪贴板同步
-- [x] 分辨率同步
-- [x] 文件传输
-  - [x] 主控->被控
-  - [x] 主控<-被控
-- [x] 文字互动
-- [x] 本机被控结束后锁屏
-- [x] 仅允许同账号远程
-- [x] 远程开机（WOL）
-- [x] 远程更新客户端版本（Windows）
-- [x] 系统托盘
-- [x] 开机自启（无人值守）
-- [x] 进程保活（windows）
-- [x] 在线更新/主控端远程更新被控端（windows）
-- [x] 帧率模式
-  - [x] 根据画面变化，智能降帧率，优化带宽占用
-- [x] 网络模式
-  - [x] 默认
-  - [x] 低延迟
-- [x] 快捷键/常用操作
-  - [x] Ctrl+Alt+Del
-  - [x] 显示桌面
-  - [x] 打开设置
-  - [x] 任务视图
-  - [x] 任务管理器
-  - [x] 资源管理器
-  - [x] 重启
-  - [x] 关机
-  - [x] 注销
-  - [x] 锁定
-- [x] 批量群控
-- [x] 隐私屏
-  - [x] 自定义隐私屏图片
-  - [x] 自定义隐私屏文字
-- [x] 虚拟屏
-- [x] 扩展屏
-- [x] 设备分组
-- [x] 后台管理
-- [x] 私有化部署
-- [ ] Docker一键部署
-
-## 对比ToDesk
-
-> 作者使用过很多远程软件：TeamViewer、向日葵、ToTesk、AnyDesk、RustDesk、UU远程、连连控，还有qq自带的远程协助等等，但用ToDesk比较多，因此用ToTesk和Wedesk作对比~
+<div align="center">
+  <img src="readme_img/icon.png" alt="Wedesk" width="100" />
+  <h1>Wedesk 远程桌面</h1>
+  <p><strong>基于 Vue 3 + Tauri 2.0 (Rust) + WebRTC + Cloudflare 边缘计算的极简高性能跨平台远程桌面控制系统。</strong></p>
+  <p>
+    <a href="https://github.com/demon820308/Wedesk/releases/latest">下载安装包/便携版 v0.1.0</a> ·
+    <a href="#核心功能特性">核心特性</a> ·
+    <a href="#快速上手">快速上手</a> ·
+    <a href="#cloudflare-边缘后端部署指引">Cloudflare 部署</a> ·
+    <a href="#技术架构">技术架构</a> ·
+    <a href="LICENSE.txt">开源协议</a>
+  </p>
+  <p>
+    <a href="https://github.com/demon820308/Wedesk/releases/latest"><img src="https://img.shields.io/github/v/release/demon820308/Wedesk?color=orange&label=%E7%89%88%E6%9C%AC" alt="最新版本" /></a>
+    <img src="https://img.shields.io/badge/%E7%89%88%E6%9C%AC-v0.1.0-green" alt="版本 v0.1.0" />
+    <img src="https://img.shields.io/badge/%E5%B9%B3%E5%8F%B0-Windows%20x64%20%7C%20Web-blue" alt="Windows x64 | Web" />
+    <img src="https://img.shields.io/badge/%E6%A1%86%E6%9E%B6-Tauri%202.0%20(Rust)%20%2B%20Vue%203-brightgreen" alt="Tauri 2.0 + Vue 3" />
+    <a href="LICENSE.txt"><img src="https://img.shields.io/badge/%E5%BC%80%E6%BA%90%E5%8D%8F%E8%AE%AE-MIT-blue" alt="MIT" /></a>
+  </p>
+</div>
 
-|                                        | Wedesk    | Wedesk Pro                                     | ToDesk                                                 |
-| -------------------------------------- | ------------ | ------------------------------------------------- | ------------------------------------------------------ |
-| 连接限制                               | 无限制，免费 | 无限制，免费                                      | 80h/月，200次/月，24h/次，超出需要购买专业版（¥24/月） |
-| 画质限制                               | 无限制，免费 | 限制1080p，免费                                   | 限制1080p，免费                                        |
-| 帧率限制                               | 无限制，免费 | 限制30帧，免费                                    | 限制30帧，免费                                         |
-| 安卓被控                               | 不支持       | 支持，免费                                        | 支持，需要购买专业版（¥24/月）或购买插件（¥15/月）     |
-| 自定义设备码                           | 支持，免费   | 支持，免费                                        | 不支持                                                 |
-| 设备分组管理                           | 支持，免费   | 支持，免费                                        | 支持，免费                                             |
-| 开机自启/无人值守                      | 不支持       | 支持，免费                                        | 支持，免费                                             |
-| 隐私屏                                 | 不支持       | 支持，免费                                        | 支持，需要购买专业版（¥24/月）                         |
-| 虚拟屏                                 | 不支持       | 支持，免费                                        | 支持，需要购买性能版（¥95/月）                         |
-| 远程时录屏                             | 不支持       | 支持，免费                                        | 不支持                                                 |
-| 屏幕墙                                 | 不支持       | 支持，阶梯收费                                    | 支持，需要购买技术版（¥218/月）                        |
-| 批量群控                               | 不支持       | 支持，屏幕墙自带                                  | 不支持                                                 |
-| web网页发起远程控制                    | 支持，免费   | 支持，免费                                        | 支持，需要购买专业版（¥24/月）                         |
-| 后台管理                               | 不支持       | 支持，免费                                        | 支持，免费                                             |
-| 远程控制web网页（仅观看）              | 支持，免费   | 支持，免费                                        | 不支持                                                 |
-| 通道数限制（同账号多主控同时发起远控） | 无限制，免费 | 无限制，免费                                      | 限制1个，增加需要购买插件（¥233/月）                   |
-| 私有化部署/二次开发                    | 支持，免费   | 支持，[订阅源码](https://desk.hsslive.cn/#/price) | 支持，需要ToDesk企业版，定价未知                       |
+---
 
-## 跨平台支持
+## ⚡ 原生极速 · 极致轻量 · 零服务器 Serverless 远控
 
-- [x] Windows 系统
-  - [x] Windows 10、Windows 11
-  - [x] Windows Server 2022
-  - [x] Windows Server 2019
-  - [ ] Windows 7 不支持
-  - [ ] 其他版本未实际测试
-- [x] macOS 系统
-  - [x] macOS 15
-  - [ ] 其他版本未实际测试
-- [x] Android系统
-  - [x] Android 8 至 Android 16
-  - [x] Android 7，被控时支持观看，暂不支持操作
-  - [ ] ~~Android 6，不再支持安卓6~~
-  - [ ] 其他版本未实际测试
-- [x] Web浏览器（[Chrome](https://www.google.com/intl/zh-CN/chrome/)、[Edge](https://www.microsoft.com/zh-cn/edge/download)、[Firefox](https://www.firefox.com/zh-CN/)、[Via](https://viayoo.com)、[Safari](https://www.apple.com/safari/)）
-- [ ] iOS系统
-- [ ] Linux 系统
-
-## 技术架构
-
-框架/第三方库：
-
-- Flutter
-- Vue
-- Koa2
-- ...
-
-编程语言：
-
-- JavaScript/Typescript
-- Dart
-- Kotlin
-- C++
-- Swift
-- ...
-
-Api：
-
-- WebRTC
-- Win32
-- Cocoa
-- AccessibilityService
-- ...
-
-## 客户端下载
-
-[https://desk.hsslive.cn/#/download](https://desk.hsslive.cn/#/download)
-
-## 预览
-
-快速体验：[https://desk.hsslive.cn](https://desk.hsslive.cn)
-
-### web网页/电脑端控制电脑端
-
-![img](https://github.com/demon820308/Wedesk/blob/main/readme_img/111.png?raw=true)
-
-### web网页/电脑端控制安卓端
-
-![img](https://github.com/demon820308/Wedesk/blob/main/readme_img/222.png?raw=true)
-
-### web网页/电脑端控制web网页
-
-> 仅观看模式
-
-![img](https://github.com/demon820308/Wedesk/blob/main/readme_img/333.png?raw=true)
-
-### web网页移动端
-
-> 首页
-
-![img](https://github.com/demon820308/Wedesk/blob/main/readme_img/777.png?raw=true)
-
-> 控制页
-
-![img](https://github.com/demon820308/Wedesk/blob/main/readme_img/888.png?raw=true)
-
-### 屏幕墙
-
-![img](https://github.com/demon820308/Wedesk/blob/main/readme_img/444.png?raw=true)
-
-### 批量群控
-
-![img](https://github.com/demon820308/Wedesk/blob/main/readme_img/b1.webp?raw=true)
-
-### 设备分组
-
-![img](https://github.com/demon820308/Wedesk/blob/main/readme_img/999.png?raw=true)
-
-### 隐私屏
-
-> 支持自定义隐私屏（图片、文字）
-
-![img](https://github.com/demon820308/Wedesk/blob/main/readme_img/a7.png?raw=true)
-
-### 虚拟屏
-
-![img](https://github.com/demon820308/Wedesk/blob/main/readme_img/a8.png?raw=true)
-
-### 鼠标、键盘仿真
-
-![img](https://github.com/demon820308/Wedesk/blob/main/readme_img/a9.jpg?raw=true)
-
-### 安卓端控制电脑端【TODO】
-
-### 安卓端控制安卓端【TODO】
-
-### 安卓端控制web网页【TODO】
-
-> 仅观看模式
-
-### 文件传输
-
-![img](https://github.com/demon820308/Wedesk/blob/main/readme_img/666.png?raw=true)
-
-### 跨平台支持
-
-![img](https://github.com/demon820308/Wedesk/blob/main/readme_img/555.png?raw=true)
-
-### [后台] 控制台
-
-![img](https://github.com/demon820308/Wedesk/blob/main/readme_img/a2.png?raw=true)
-
-### [后台] 黑名单
-
-![img](https://github.com/demon820308/Wedesk/blob/main/readme_img/a1.png?raw=true)
-
-### [后台] 设备分组
-
-![img](https://github.com/demon820308/Wedesk/blob/main/readme_img/a3.png?raw=true)
-
-### [后台] 远程管理
-
-- 远程记录
-
-![img](https://github.com/demon820308/Wedesk/blob/main/readme_img/a4.png?raw=true)
-
-- 在线远程
-
-![img](https://github.com/demon820308/Wedesk/blob/main/readme_img/a5.png?raw=true)
-
-- 在线设备
-
-![img](https://github.com/demon820308/Wedesk/blob/main/readme_img/a6.png?raw=true)
-
-## Wedesk Pro免费吗？
-
-- **免费**，你可以直接下载Wedesk客户端，开始流畅的远程体验。
-- 有付费功能（隐私屏、虚拟屏、屏幕墙、高码率/帧率/画质），如果你经常使用到Wedesk，推荐你购买任意VIP套餐（包月6元/月、包年4.2元/月）。
-
-## 常见问题
-
-[https://desk.hsslive.cn/#/faq](https://desk.hsslive.cn/#/faq)
-
-## 问题反馈
-
-欢迎提 [issue](https://github.com/demon820308/Wedesk/issues)
-
-## 联系作者
-
-[https://desk.hsslive.cn/#/hi](https://desk.hsslive.cn/#/hi)
-
-## Wedesk Pro源码
-
-- Wedesk Pro不开源，源码需要购买：[https://desk.hsslive.cn/#/price](https://desk.hsslive.cn/#/price)
-
-
-
+| 🚀 原生极速 · 极致轻量 | 🎯 紧凑面板 · 双端自适应 | ☁️ 零服务器 · Cloudflare 托管 |
+| :--- | :--- | :--- |
+| 告别传统 Electron 笨重运行环境，采用 **Tauri 2.0 (Rust)** 原生编译，安装包仅十几兆，内存占用极低，极速秒启。 | 精心设计的左右双列控制面板，完美适配紧凑桌面视窗无溢出，支持设备代码与连接密码**一键复制**，直观清晰。 | 依托 **Cloudflare Workers + D1 + Durable Objects** 打造 100% Serverless 信令后端，无需购买 VPS，零运维成本。 |
+
+数据流经 WebRTC 点对点直连（P2P DataChannel 与 MediaStream），低延迟传输，端到端私密安全。
+
+---
+
+## 🌟 核心功能特性
+
+### 1. 🚀 基于 Tauri 2.0 深度原生重构
+- **极小体积与极低内存**：使用 Rust 编译原生二进制应用，彻底剥离 Chromium 与 Node.js 臃肿环境，Windows 安装包及便携版体积大幅缩减。
+- **底层原生事件捕获**：在 Rust 侧深度对接 Windows API，键盘与鼠标事件响应近乎零延迟。
+
+### 2. 🎛️ 紧凑自适应受控面板（告别界面溢出）
+- **左右双列并排排布**：「设备代码」与「连接密码」由上下堆叠重构为左右分栏排布，卡片整体纵向高度缩减超过 115px。
+- **密码一键复制补全**：连接密码支持眼睛图标查看/隐藏，并新增一键快速复制按钮，方便将连接凭证快捷分享。
+- **窗口自适应与防溢出**：完美契合 800×500 紧凑视窗，会话卡片连入后居中完整呈现，杜绝滚动条或边缘截断。
+
+### 3. ⚡ 低延迟高清 WebRTC 串流控制
+- **点对点直连（P2P）**：支持高帧率实时桌面画面采集，画质清晰流畅。
+- **完整交互指令链路**：鼠标移动、左键/右键点击、拖拽、滚轮滚动与键盘全键位输入实时双向同步。
+- **双向剪贴板同步**：主控端与受控端文本剪贴板自动互通。
+
+### 4. ☁️ 全托管 Cloudflare Serverless 边缘架构
+- **零服务器成本**：无须购置任何云服务器/ECS/VPS，信令传输与关系数据全部运行在 Cloudflare 全球边缘网络。
+- **持久化设备管理**：通过 Cloudflare D1 Serverless SQLite 数据库管理设备号绑定与持久化状态。
+
+---
+
+## 📦 快速上手
+
+### 方式一：Windows 桌面客户端（推荐日常使用）
+
+无需配置 Node.js 或 Rust 开发环境，解压即用！
+
+1. 在 [Releases 发布页面](https://github.com/demon820308/Wedesk/releases/latest) 下载：
+   - **`wedesk-0.1.0-windows-x64.exe`**（标准安装程序）或
+   - **`wedesk-0.1.0-windows-x64-portable.zip`**（绿色免安装便携版）；
+2. 解压或安装后双击运行 **`Wedesk.exe`**；
+3. 界面打开后，即可查看您的专属「设备代码」与「连接密码」；
+4. 点击图标可一键复制设备代码或连接密码，或点击“一键复制邀请信息”分享给主控端即可发起协助。
+
+---
+
+### 方式二：开发者源码本地运行
+
+如果您熟悉前端与 Rust 环境并希望进行二次开发：
+
+```bash
+# 1. 克隆代码仓库
+git clone https://github.com/demon820308/Wedesk.git
+cd Wedesk
+
+# 2. 安装项目依赖
+pnpm install
+
+# 3. 启动 Web 前端调试（浏览器模式）
+pnpm dev:web
+
+# 4. 启动 Tauri 桌面端调试（需本地安装 Rust 工具链）
+pnpm tauri dev
+
+# 5. 构建本地桌面客户端产物
+pnpm tauri build
+```
+
+---
+
+## ☁️ Cloudflare 边缘后端部署指引
+
+本项目在 `cloudflare/` 目录下提供了开箱即用的 **100% Serverless 边缘后端**，涵盖 WebSocket 实时信令、设备管理 API 与 SQLite 数据存储，无需任何服务器即可全球无缝直连。
+
+### 架构组件
+- **Web 主控前端**：Cloudflare Pages（免费 CDN 全球托管）
+- **实时信令服务**：Cloudflare Workers + Durable Objects（长连接 WebSocket 状态中枢）
+- **设备号与密码数据**：Cloudflare D1（Serverless SQLite 分布式数据库）
+- **NAT 穿透与中继**：Cloudflare Calls / TURN 服务（或任意自建 Coturn）
+
+---
+
+### 详细部署步骤
+
+#### 1. 登录 Cloudflare
+确保本地已安装 Node.js，打开终端执行授权登录：
+```bash
+npx wrangler login
+```
+系统将自动打开浏览器，点击“允许”即可完成绑定。
+
+#### 2. 创建并初始化 Cloudflare D1 数据库
+进入 `cloudflare` 目录：
+```bash
+cd cloudflare
+```
+创建名为 `wedesk-db` 的数据库：
+```bash
+npx wrangler d1 create wedesk-db
+```
+执行成功后终端会返回类似如下配置信息：
+```toml
+database_name = "wedesk-db"
+database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+```
+打开 `cloudflare/wrangler.toml` 文件，将其中的 `database_id` 替换为你刚刚生成的实际 ID：
+```toml
+[[d1_databases]]
+binding = "DB"
+database_name = "wedesk-db"
+database_id = "你的database_id"
+```
+接着在云端执行 SQL 结构初始化：
+```bash
+npx wrangler d1 execute wedesk-db --file=./schema.sql --remote
+```
+
+#### 3. 一键部署后端 Worker 信令服务
+在 `cloudflare` 目录下执行：
+```bash
+npx wrangler deploy
+```
+部署成功后，终端将输出专属的 Worker 服务公网域名，例如：
+`https://wedesk-backend.<你的账号域>.workers.dev`
+
+#### 4. 配置客户端连接公网信令服务
+回到项目根目录，打开 `src/constant.ts`，将线上服务地址修改为您刚刚部署的域名：
+```typescript
+export const WEBSOCKET_URL =
+  process.env.NODE_ENV === 'development'
+    ? `ws://localhost:4300`
+    : `wss://wedesk-backend.<你的账号域>.workers.dev`;
+
+export const AXIOS_BASEURL =
+  process.env.NODE_ENV === 'development'
+    ? `/api`
+    : `https://wedesk-backend.<你的账号域>.workers.dev`;
+```
+
+#### 5. （可选）一键部署 Web 主控端至 Cloudflare Pages
+在项目根目录下构建纯前端产物并一键部署至 Pages：
+```bash
+# 构建前端生产产物
+pnpm run build:prod
+
+# 一键推送至 Cloudflare Pages 托管
+npx wrangler pages deploy dist --project-name wedesk-web
+```
+部署完成后即可通过分配的 Pages 网址直接在手机或任何浏览器上随时随地远程控制电脑。
+
+---
+
+## 🏗️ 技术架构
+
+```text
+┌────────────────────────────────────────────────────────┐
+│                   Wedesk Client                        │
+│  ┌───────────────────────┐   ┌──────────────────────┐  │
+│  │   Vue 3 + Naive UI    │   │   Tauri 2.0 (Rust)   │  │
+│  │  (Cursor 风格控制面板) │   │ (原生系统 API / 键鼠) │  │
+│  └───────────┬───────────┘   └───────────┬──────────┘  │
+└──────────────┼───────────────────────────┼─────────────┘
+               │ WebRTC P2P (音视频 / 键鼠)  │
+               ▼                           ▼
+┌────────────────────────────────────────────────────────┐
+│             Cloudflare Serverless 边缘后端             │
+│  ┌───────────────────────┐   ┌──────────────────────┐  │
+│  │ Cloudflare Workers    │   │ Cloudflare D1 (DB)   │  │
+│  │ + Durable Objects     │   │ (设备信息 / 鉴权校验) │  │
+│  │ (WebSocket 信令中枢)   │   │                      │  │
+│  └───────────────────────┘   └──────────────────────┘  │
+└────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 📄 开源协议
+
+本项目基于 [MIT 许可证](LICENSE.txt) 开源发布。

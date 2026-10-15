@@ -146,9 +146,9 @@ export const PROJECT_GITHUB = `https://github.com/demon820308/Wedesk`;
 export const WEB_DESK_URL = `https://github.com/demon820308/Wedesk`;
 
 export const AUTHOR_INFO = {
-  github: 'https://github.com/demon820308',
-  wechat: 'zw_bigi',
-  qq: '51820645',
+  github: 'https://github.com/demon820308/Wedesk',
+  wechat: '',
+  qq: '',
 };
 
 export const COMMON_URL = {

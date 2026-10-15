@@ -6,7 +6,7 @@
     "url": "https://github.com/demon820308/Wedesk"
   },
   "license": "MIT",
-  "author": "demon820308 <51820645@qq.com>",
+  "author": "demon820308",
   "type": "module",
   "scripts": {
     "build": "cross-env VITE_APP_RELEASE_PROJECT_ISWEB=true vite build",
