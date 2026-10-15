@@ -147,8 +147,25 @@ npx wrangler deploy
 部署成功后，终端将输出专属的 Worker 服务公网域名，例如：
 `https://wedesk-backend.<你的账号域>.workers.dev`
 
-#### 4. 配置客户端连接公网信令服务
-回到项目根目录，打开 `src/constant.ts`，将线上服务地址修改为您刚刚部署的域名：
+#### 4. 配置客户端连接私有公网信令服务
+
+##### 方式 A：Windows 桌面客户端直接配置（无需编译代码，普通用户推荐）
+如果您直接下载并使用了 Releases 页面提供的桌面客户端安装包或便携版，可直接在图形界面内完成切换：
+1. 启动 Wedesk 客户端，点击左侧导航栏的 **「设置」**；
+2. 找到 **「接口与服务配置」** 区域，在 **「信令与转发节点」** 旁点击 **「修改节点配置」**；
+3. 在弹窗中成对填入您部署的 Cloudflare 节点：
+   - **`wss`**：填写 WebSocket 信令地址，例如 `wss://wedesk-backend.<你的账号域>.workers.dev`（或自绑定的域名如 `wss://wedesk.yourdomain.com`）；
+   - **`axios`**：填写 HTTP 接口地址，例如 `https://wedesk-backend.<你的账号域>.workers.dev`（或自绑定的域名如 `https://wedesk.yourdomain.com`）；
+   - **`coturn`**：穿透中继节点。客户端默认内置了 5 个免费公开的 STUN 打洞节点（含 Cloudflare / Google / 腾讯等），绝大多数网络环境下**直接留空**即可正常实现 P2P 直连远控；
+4. 点击 **「确定」** 保存后，**完全退出并重新启动 Wedesk 客户端**，即可无缝接入您专属的私有信令网络！
+
+> **📌 关键提示**：
+> 1. **必须成对填写**：Cloudflare Worker 同时处理信令（WSS）和接口（Axios），请同时配置 `wss` 与 `axios` 两个字段，避免请求分离；
+> 2. **必须重启客户端**：网络实例与长连接在程序启动时初始化，保存本地配置后须重启程序以加载新节点。
+
+##### 方式 B：开发者源码二次编译
+如果您希望直接把自己的域名固化为客户端默认地址并自行打包：
+打开项目中的 `src/constant.ts`，修改默认域名：
 ```typescript
 export const WEBSOCKET_URL =
   process.env.NODE_ENV === 'development'
