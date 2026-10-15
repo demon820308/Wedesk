@@ -864,9 +864,6 @@ async function handleClose() {
     }
   } else if (!ipcRenderer) {
     router.push({ name: routerName.remote });
-    setTimeout(() => {
-      windowReload();
-    }, 300);
   }
 }
 
