@@ -398,7 +398,10 @@ export function useHostService() {
       return;
     }
     // 纯网页环境：仅在处于受控端页面（/#/host）且开启允许被控时才允许触发浏览器屏幕共享
-    if (!window.location.hash.includes('host') || cacheStore.allowControl === false) {
+    if (
+      !window.location.hash.includes('host') ||
+      cacheStore.allowControl === false
+    ) {
       return;
     }
     isCapturingScreen = true;

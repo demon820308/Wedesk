@@ -27,6 +27,8 @@ export default defineFlatConfig([
       'deploy/**/*',
       '.DS_Store',
       '.eslintcache',
+      'src-tauri/**/*',
+      'cloudflare/**/*',
     ],
     languageOptions: {
       globals: {},
