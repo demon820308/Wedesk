@@ -2,6 +2,7 @@ import { getRandomString } from 'billd-utils';
 
 import { WINDOW_ID_ENUM } from '@/constant';
 import { IPC_EVENT } from '@/event';
+import router, { routerName } from '@/router';
 import { ipcRenderer, ipcRendererSend } from '@/utils';
 
 export const isTauri = (): boolean => {
@@ -139,6 +140,9 @@ export async function desktopOpenRemoteWindow(params: Record<string, any>) {
       },
     });
   } else {
-    window.open(url, '_blank', 'width=1280,height=720');
+    router.push({
+      name: routerName.webrtc,
+      query: params,
+    });
   }
 }

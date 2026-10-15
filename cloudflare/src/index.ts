@@ -332,9 +332,12 @@ export class SignalingHub {
         if (session.roomId && this.rooms.has(session.roomId)) {
           const room = this.rooms.get(session.roomId);
           room?.delete(ws);
-          room?.forEach((client) => {
-            this.emitTo(client, 'billdDeskCloseRemote', { sender: session.socketId });
-          });
+          // 仅当受控宿主端异常退出时，才向房间内广播断开；避免主控端刷新/重连时误踢同房间连接
+          if (session.uuid && session.uuid === session.roomId) {
+            room?.forEach((client) => {
+              this.emitTo(client, 'billdDeskCloseRemote', { sender: session.socketId });
+            });
+          }
         }
       }
       this.sockets.delete(ws);
@@ -356,14 +359,10 @@ export class SignalingHub {
     // 1. 客户端上线加入房间 / 状态心跳上报
     if (event === 'billdDeskJoin' || event === 'billdDeskUpdateUser') {
       const data = payload?.data || {};
-      const deskUserUuid = (
-        data.deskUserUuid ||
-        (event === 'billdDeskJoin' ? data.live_room_id : '') ||
-        data.roomId ||
-        ''
-      ).toString().trim();
+      const deskUserUuid = (data.deskUserUuid || '').toString().trim();
       const roomId = (data.live_room_id || data.roomId || deskUserUuid || '').toString().trim();
 
+      // 仅当携带明确的本机设备代码时记录在线表，严禁使用房间号回退，避免主控端加入房间时覆盖受控端
       if (deskUserUuid) {
         session.uuid = deskUserUuid;
         this.uuidMap.set(deskUserUuid, ws);

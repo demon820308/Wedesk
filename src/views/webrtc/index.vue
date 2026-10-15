@@ -564,6 +564,8 @@ function init() {
   window.addEventListener('focus', syncClipboardToHost);
   initWs({
     roomId: roomId.value,
+    deskUserUuid: deskUserUuid.value,
+    deskUserPassword: deskUserPassword.value,
     isAnchor: false,
     isRemoteDesk: true,
   });

@@ -302,8 +302,8 @@ async function handleConfirm(pwd: string) {
 
         await desktopOpenRemoteWindow({
           roomId: cleanUuid,
-          deskUserUuid: cacheStore.deskUserUuid,
-          deskUserPassword: cacheStore.deskUserPassword,
+          deskUserUuid: cacheStore.deskUserUuid || Date.now().toString(),
+          deskUserPassword: cacheStore.deskUserPassword || 'guest',
           remoteDeskUserUuid: cleanUuid,
           remoteDeskUserPassword: pwd,
           receiverId: receiverId.value,
